@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { Challenge, ChallengeDay, ChallengeSetupInput, DailyTradeInput, AdaptiveAdjustment, RecalculationEvent } from '../types/challenge'
-import type { Trade } from '../types/trade'
 
 const CHALLENGE_KEY = 'xauusd-challenge'
 
@@ -175,7 +174,7 @@ export const useChallenge = () => {
     actualProfit: number,
     adjustmentType: 'stay' | 'extend' | 'reduce_risk',
     additionalDays?: number,
-    trades?: Trade[],
+    trades?: string[],
     notes?: string
   ): AdaptiveAdjustment => {
     if (!challenge) {
@@ -219,7 +218,7 @@ export const useChallenge = () => {
       status: dayStatus,
       actualProfit,
       actualBalance,
-      trades: (trades && trades.length > 0 ? trades : day.trades) as Trade[],
+      trades: trades && trades.length > 0 ? trades : day.trades,
       notes: notes || day.notes
     }
     
