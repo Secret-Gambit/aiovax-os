@@ -15,9 +15,55 @@
     />
     <link rel="manifest" href="/manifest.json" />
     <title>XAUUSD Trading Journal</title>
+    <style>
+      /* Critical CSS - loads immediately */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0a0a0a;
+        height: 100%;
+      }
+      .app-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: #0a0a0a;
+        color: #ffd700;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      .app-loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #333;
+        border-top-color: #ffd700;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .app-loading-text {
+        margin-top: 20px;
+        font-size: 16px;
+        letter-spacing: 1px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="app-loading">
+        <div class="app-loading-spinner"></div>
+        <div class="app-loading-text">Loading...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
