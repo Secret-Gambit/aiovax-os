@@ -33,7 +33,7 @@ export function QuickLogger({
   const [emotion, setEmotion] = useState<Emotion | null>(editingTrade?.emotion || initialTrade?.emotion || null)
   const [result, setResult] = useState<Result | null>(editingTrade?.result || null)
   const [rMultiple, setRMultiple] = useState<number>(editingTrade?.rMultiple || 0)
-  const [notes, setNotes] = useState<string>(editingTrade?.notes || initialTrade ? `Copied from: ${initialTrade.setup.join(', ')}` : '')
+  const [notes, setNotes] = useState<string>(editingTrade?.notes || (initialTrade?.setup ? `Copied from: ${initialTrade.setup.join(', ')}` : ''))
   const [image, setImage] = useState<string | null>(editingTrade?.image || null)
   
   // Template state

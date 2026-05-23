@@ -219,7 +219,7 @@ export const useChallenge = () => {
       status: dayStatus,
       actualProfit,
       actualBalance,
-      trades: trades && trades.length > 0 ? trades : day.trades,
+      trades: (trades && trades.length > 0 ? trades : day.trades) as Trade[],
       notes: notes || day.notes
     }
     
@@ -346,7 +346,7 @@ export const useChallenge = () => {
       adjustmentType = 'stay'
     }
     
-    return recalculatePlan(dayNumber, profit, adjustmentType, trades, notes)
+    return recalculatePlan(dayNumber, profit, adjustmentType, undefined, trades, notes)
   }, [challenge, recalculatePlan])
 
   // Delete challenge
