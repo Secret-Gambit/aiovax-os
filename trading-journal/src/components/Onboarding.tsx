@@ -358,7 +358,7 @@ function FeaturesStep() {
     },
     {
       icon: BarChart3,
-      title: 'TradeZella-Style Dashboard',
+      title: 'Pro Analytics Dashboard',
       desc: 'Profit Factor, Expectancy, Setup Performance',
     },
     {

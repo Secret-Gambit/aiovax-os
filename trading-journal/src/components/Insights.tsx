@@ -309,6 +309,58 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade }: Ins
           </button>
         )}
 
+          {/* Key Metrics Section */}
+          <section>
+            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-1">Key Metrics</p>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Total Trades */}
+              <div className="phone-card p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                    <BarChart3 size={16} className="text-[var(--gold-primary)]" />
+                  </div>
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Trades</span>
+                </div>
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{allTime.totalTrades}</p>
+              </div>
+
+              {/* Win Rate */}
+              <div className="phone-card p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                    <TrendingUp size={16} className="text-[var(--gold-primary)]" />
+                  </div>
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Win Rate</span>
+                </div>
+                <p className="text-2xl font-bold text-[var(--gold-primary)]">{allTime.winRate.toFixed(1)}%</p>
+              </div>
+
+              {/* Net R */}
+              <div className="phone-card p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${allTime.netR >= 0 ? 'bg-[var(--profit-soft)]' : 'bg-[var(--loss-soft)]'}`}>
+                    <TrendingUp size={16} className={allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'} />
+                  </div>
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Net R</span>
+                </div>
+                <p className={`text-2xl font-bold ${allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'}`}>
+                  {allTime.netR >= 0 ? '+' : ''}{allTime.netR.toFixed(2)}R
+                </p>
+              </div>
+
+              {/* Avg R */}
+              <div className="phone-card p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center">
+                    <TrendingUp size={16} className="text-[var(--text-muted)]" />
+                  </div>
+                  <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Avg R</span>
+                </div>
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{allTime.avgR.toFixed(2)}R</p>
+              </div>
+            </div>
+          </section>
+
         {/* R-Multiple Histogram */}
         <RMHistogram trades={allTimeTrades} />
 
@@ -336,48 +388,48 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade }: Ins
 
         {/* Emotion Analytics */}
         <section className="phone-card rounded-2xl p-4">
-          <p className="text-xs font-semibold mb-3 gold-text">EMOTIONS</p>
+          <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Emotions</p>
 
           {/* Emotion Stats */}
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <div className="phone-card rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold status-profit">{allTime.pctCalm.toFixed(0)}%</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Calm</p>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="bg-[var(--profit-soft)] rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-[var(--profit)]">{allTime.pctCalm.toFixed(0)}%</p>
+              <p className="text-xs mt-1 text-[var(--text-muted)]">Calm</p>
             </div>
-            <div className="phone-card rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold status-loss">{allTime.pctEmotional.toFixed(0)}%</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Emotional</p>
+            <div className="bg-[var(--loss-soft)] rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-[var(--loss)]">{allTime.pctEmotional.toFixed(0)}%</p>
+              <p className="text-xs mt-1 text-[var(--text-muted)]">Emotional</p>
             </div>
           </div>
 
           {/* Revenge Trades */}
-          <div className="phone-card rounded-xl p-3 flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--loss-soft)' }}>
-                <Zap size={16} style={{ color: 'var(--loss)' }} />
+          <div className="bg-[var(--loss-soft)] rounded-xl p-3 flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[var(--loss)]/20 flex items-center justify-center">
+                <Zap size={18} className="text-[var(--loss)]" />
               </div>
               <div>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Revenge Trades</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">Revenge Trades</p>
+                <p className="text-xs text-[var(--text-muted)]">Avoid emotional trading</p>
               </div>
             </div>
-            <span className="text-xl font-bold status-loss">{allTime.revengeTrades}</span>
+            <span className="text-xl font-bold text-[var(--loss)]">{allTime.revengeTrades}</span>
           </div>
 
           {/* Emotion breakdown */}
           {emotions.length > 0 && (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {emotions.map(emotion => (
-                <div key={emotion.name} className="flex items-center justify-between py-2 px-2 rounded-lg"
-                  style={{ borderBottom: '1px solid var(--border-soft)' }}>
-                  <span className="text-sm font-medium">{emotion.name}</span>
+                <div key={emotion.name} className="flex items-center justify-between py-2 px-3 rounded-lg bg-[var(--bg-tertiary)]">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{emotion.name}</span>
                   <div className="text-right flex items-center gap-2">
                     <span className={`text-sm font-bold ${
-                      (emotion.name === 'Calm' || emotion.name === 'Confident') ? 'status-profit' :
-                      (emotion.name === 'Revenge Trading' || emotion.name === 'Overtrading Urge') ? 'status-loss' : ''
+                      (emotion.name === 'Calm' || emotion.name === 'Confident') ? 'text-[var(--profit)]' :
+                      (emotion.name === 'Revenge Trading' || emotion.name === 'Overtrading Urge') ? 'text-[var(--loss)]' : 'text-[var(--text-secondary)]'
                     }`}>
                       {emotion.winRate.toFixed(0)}%
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-card)] text-[var(--text-muted)]">
                       {emotion.trades}
                     </span>
                   </div>

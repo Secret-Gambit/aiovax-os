@@ -207,71 +207,103 @@ export function HomeDashboard({
       <div className="flex-none py-3">
         <button
           onClick={onStartNewTrade}
-          className="w-full py-5 rounded-2xl gold-accent font-bold text-lg tap-target touch-manipulation active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl gold-accent font-bold text-lg tap-target touch-manipulation active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
         >
           <Plus size={20} />
-          <span>NEW TRADE</span>
+          <span>LOG NEW TRADE</span>
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide space-y-3 pb-4">
-        {/* Main Stats */}
+      {/* Stats Section */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4 pb-4">
+        
+        {/* Key Metrics Row */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="phone-card p-4">
-            <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Trades</p>
-            <p className="text-3xl font-bold">{today.count}</p>
-          </div>
-          <div className="phone-card p-4">
-            <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Net R</p>
-            <p className={`text-3xl font-bold ${today.netR >= 0 ? 'status-profit' : 'status-loss'}`}>
-              {today.netR >= 0 ? '+' : ''}{today.netR.toFixed(1)}R
+          {/* Net R Card */}
+          <div className="phone-card p-4 rounded-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${today.netR >= 0 ? 'bg-[var(--profit-soft)]' : 'bg-[var(--loss-soft)]'}`}>
+                <TrendingUp size={16} className={today.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'} />
+              </div>
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Net R</span>
+            </div>
+            <p className={`text-2xl font-bold ${today.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'}`}>
+              {today.netR >= 0 ? '+' : ''}{today.netR.toFixed(2)}R
             </p>
           </div>
-        </div>
 
-        {/* Win/Loss/BE */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="phone-card p-3 text-center">
-            <p className="text-xs" style={{ color: 'var(--profit)' }}>W</p>
-            <p className="text-xl font-semibold">{today.wins}</p>
-          </div>
-          <div className="phone-card p-3 text-center">
-            <p className="text-xs" style={{ color: 'var(--loss)' }}>L</p>
-            <p className="text-xl font-semibold">{today.losses}</p>
-          </div>
-          <div className="phone-card p-3 text-center">
-            <p className="text-xs" style={{ color: 'var(--neutral)' }}>BE</p>
-            <p className="text-xl font-semibold">{today.breakevens}</p>
+          {/* Trades Count Card */}
+          <div className="phone-card p-4 rounded-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                <Flame size={16} className="text-[var(--gold-primary)]" />
+              </div>
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Trades</span>
+            </div>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{today.count}</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              <span className="text-[var(--profit)]">{today.wins}W</span> / <span className="text-[var(--loss)]">{today.losses}L</span>
+            </p>
           </div>
         </div>
 
         {/* Streak Visualizer */}
         <StreakVisualizer streak={today.streak} streakType={today.streakType} />
 
-        {/* Recent Trades */}
+        {/* Recent Trades Section */}
         {todayTrades.length > 0 && (
-          <div>
-            <p className="text-xs font-semibold mb-2 gold-text">TODAY</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Today&apos;s Trades</p>
+              <span className="text-xs text-[var(--text-muted)]">{todayTrades.length} total</span>
+            </div>
             <div className="space-y-2">
               {todayTrades.slice(0, 5).map((trade) => (
                 <div
                   key={trade.id}
-                  className="phone-card p-3 flex items-center justify-between"
+                  className="phone-card p-3 rounded-xl flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    {trade.direction === 'buy' ? <TrendingUp size={18} style={{ color: 'var(--profit)' }} /> : <TrendingDown size={18} style={{ color: 'var(--loss)' }} />}
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      trade.result === 'Win' ? 'bg-[var(--profit-soft)]' : 
+                      trade.result === 'Loss' ? 'bg-[var(--loss-soft)]' : 'bg-[var(--bg-tertiary)]'
+                    }`}>
+                      {trade.direction === 'buy' ? (
+                        <TrendingUp size={18} className={trade.result === 'Win' ? 'text-[var(--profit)]' : trade.result === 'Loss' ? 'text-[var(--loss)]' : 'text-[var(--text-muted)]'} />
+                      ) : (
+                        <TrendingDown size={18} className={trade.result === 'Win' ? 'text-[var(--profit)]' : trade.result === 'Loss' ? 'text-[var(--loss)]' : 'text-[var(--text-muted)]'} />
+                      )}
+                    </div>
                     <div>
-                      <p className="text-sm font-medium">{trade.setup[0] || 'Trade'}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{trade.entryTrigger}</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{trade.setup[0] || 'Trade'}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{trade.entryTrigger} • {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                   </div>
-                  <span className={`text-sm font-bold ${trade.result === 'Win' ? 'status-profit' : trade.result === 'Loss' ? 'status-loss' : ''}`}>
-                    {trade.rMultiple > 0 ? '+' : ''}{trade.rMultiple.toFixed(1)}R
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      trade.result === 'Win' ? 'bg-[var(--profit-soft)] text-[var(--profit)]' : 
+                      trade.result === 'Loss' ? 'bg-[var(--loss-soft)] text-[var(--loss)]' : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+                    }`}>
+                      {trade.result}
+                    </span>
+                    <span className={`text-sm font-bold ${trade.result === 'Win' ? 'text-[var(--profit)]' : trade.result === 'Loss' ? 'text-[var(--loss)]' : 'text-[var(--text-muted)]'}`}>
+                      {trade.result === 'Win' ? '+' : trade.result === 'Loss' ? '-' : ''}{Math.abs(trade.rMultiple).toFixed(1)}R
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {todayTrades.length === 0 && (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center mx-auto mb-3">
+              <Plus size={24} className="text-[var(--text-muted)]" />
+            </div>
+            <p className="text-[var(--text-muted)] text-sm mb-1">No trades today</p>
+            <p className="text-xs text-[var(--text-muted)]">Tap &quot;Log New Trade&quot; to get started</p>
           </div>
         )}
       </div>
