@@ -19,12 +19,6 @@ export function InstallPrompt() {
       return
     }
 
-    // Check if user has dismissed the prompt before
-    const hasDismissed = localStorage.getItem('install-prompt-dismissed')
-    if (hasDismissed) {
-      return
-    }
-
     // Listen for beforeinstallprompt event (Chrome/Edge/Android)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
@@ -37,7 +31,7 @@ export function InstallPrompt() {
 
     // For iOS, show prompt if not installed (iOS doesn't support beforeinstallprompt)
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-    if (isIOS && !hasDismissed) {
+    if (isIOS) {
       setTimeout(() => setIsVisible(true), 3000)
     }
 
@@ -73,7 +67,6 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setIsVisible(false)
-    localStorage.setItem('install-prompt-dismissed', 'true')
   }
 
   // Don't show if already installed or prompt not available
