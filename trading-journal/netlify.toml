@@ -2,18 +2,24 @@
   publish = "dist"
   command = "npm run build"
 
-# Don't redirect asset files - serve them directly
-[[redirects]]
-  from = "/assets/*"
-  to = "/assets/:splat"
-  status = 200
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--include=dev"
 
-# SPA fallback - redirect all other routes to index.html
+# Cache hashed assets forever (Vite generates hashed filenames)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cache index.html (always get fresh version)
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, no-cache, must-revalidate"
+
+# SPA fallback - redirect all routes to index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[build.environment]
-  NODE_VERSION = "20"
-  NPM_FLAGS = "--include=dev"
