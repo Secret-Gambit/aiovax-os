@@ -1,8 +1,20 @@
 import { useState, useEffect } from 'react'
+import { themeColors, type ThemeColor } from '../hooks/useTheme'
 
 export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0)
   const [messageIndex, setMessageIndex] = useState(0)
+  const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
+
+  // Load theme on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
+    if (savedTheme && themeColors[savedTheme]) {
+      setCurrentTheme(savedTheme)
+    }
+  }, [])
+
+  const colors = themeColors[currentTheme]
 
   const messages = [
     "Initializing trading engine...",
@@ -57,8 +69,8 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px)
+            linear-gradient(${colors.primary}08 1px, transparent 1px),
+            linear-gradient(90deg, ${colors.primary}08 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px',
           transform: 'perspective(500px) rotateX(60deg) translateY(0)',
@@ -67,16 +79,16 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
       />
 
       {/* Tech Decorations */}
-      <div className="absolute top-8 left-8 text-[10px] text-[rgba(255,215,0,0.15)] font-mono tracking-wider">
+      <div className="absolute top-8 left-8 text-[10px] font-mono tracking-wider" style={{ color: `${colors.primary}26` }}>
         ◄ SYSTEM_READY ►
       </div>
-      <div className="absolute top-8 right-8 text-[10px] text-[rgba(255,215,0,0.15)] font-mono tracking-wider">
+      <div className="absolute top-8 right-8 text-[10px] font-mono tracking-wider" style={{ color: `${colors.primary}26` }}>
         v1.0.0
       </div>
-      <div className="absolute bottom-8 left-8 text-[10px] text-[rgba(255,215,0,0.15)] font-mono tracking-wider">
+      <div className="absolute bottom-8 left-8 text-[10px] font-mono tracking-wider" style={{ color: `${colors.primary}26` }}>
         XAU/USD
       </div>
-      <div className="absolute bottom-8 right-8 text-[10px] text-[rgba(255,215,0,0.15)] font-mono tracking-wider">
+      <div className="absolute bottom-8 right-8 text-[10px] font-mono tracking-wider" style={{ color: `${colors.primary}26` }}>
         PRO_TRADER
       </div>
 
@@ -84,19 +96,23 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
       <div className="relative w-[100px] h-[100px] mb-8">
         {/* Orbit Ring */}
         <div 
-          className="absolute top-1/2 left-1/2 w-[140px] h-[140px] -mt-[70px] -ml-[70px] rounded-full border border-[rgba(255,215,0,0.2)]"
-          style={{ animation: 'orbitRotate 4s linear infinite' }}
+          className="absolute top-1/2 left-1/2 w-[140px] h-[140px] -mt-[70px] -ml-[70px] rounded-full border"
+          style={{ 
+            borderColor: `${colors.primary}33`,
+            animation: 'orbitRotate 4s linear infinite'
+          }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#ffd700] shadow-[0_0_10px_#ffd700]" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#ffd700] shadow-[0_0_10px_#ffd700]" />
-          <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-[#ffd700] shadow-[0_0_10px_#ffd700]" />
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full shadow-[0_0_10px]" style={{ backgroundColor: colors.primary, boxShadow: `0 0 10px ${colors.primary}` }} />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full shadow-[0_0_10px]" style={{ backgroundColor: colors.primary, boxShadow: `0 0 10px ${colors.primary}` }} />
+          <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full shadow-[0_0_10px]" style={{ backgroundColor: colors.primary, boxShadow: `0 0 10px ${colors.primary}` }} />
         </div>
 
         {/* Logo */}
         <div 
-          className="w-full h-full rounded-3xl flex items-center justify-center text-[56px] font-bold text-black shadow-[0_0_60px_rgba(255,215,0,0.3)]"
+          className="w-full h-full rounded-3xl flex items-center justify-center text-[56px] font-bold text-black"
           style={{
-            background: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 100%)',
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+            boxShadow: `0 0 60px ${colors.primary}4D, 0 0 100px ${colors.primary}1A`,
             animation: 'logoPulse 2s ease-in-out infinite, logoRotate 3s ease-in-out infinite'
           }}
         >
@@ -108,7 +124,7 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
       <div 
         className="text-[28px] font-extrabold tracking-[4px] uppercase mb-2"
         style={{
-          background: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 50%, #ffd700 100%)',
+          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.primary} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
@@ -123,8 +139,11 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
       {/* Status */}
       <div className="flex items-center gap-3 font-mono text-sm text-[#888] min-h-[20px]">
         <div 
-          className="w-2 h-2 rounded-full bg-[#ffd700]"
-          style={{ animation: 'statusBlink 1s ease-in-out infinite' }}
+          className="w-2 h-2 rounded-full"
+          style={{ 
+            backgroundColor: colors.primary,
+            animation: 'statusBlink 1s ease-in-out infinite'
+          }}
         />
         <span className="transition-opacity duration-200">
           {messages[messageIndex]}
@@ -132,13 +151,13 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-[280px] h-1 bg-[rgba(255,215,0,0.1)] rounded-sm mt-5 overflow-hidden relative">
+      <div className="w-[280px] h-1 rounded-sm mt-5 overflow-hidden relative" style={{ backgroundColor: `${colors.primary}1A` }}>
         <div 
           className="h-full rounded-sm transition-all duration-100 ease-linear"
           style={{
             width: `${progress}%`,
-            background: 'linear-gradient(90deg, #ffd700 0%, #ffaa00 100%)',
-            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+            background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+            boxShadow: `0 0 10px ${colors.primary}80`
           }}
         >
           {/* Shimmer */}
@@ -168,8 +187,8 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
           to { transform: rotate(360deg); }
         }
         @keyframes logoPulse {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(255, 215, 0, 0.3), 0 0 100px rgba(255, 215, 0, 0.1); }
-          50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(255, 215, 0, 0.5), 0 0 120px rgba(255, 215, 0, 0.2); }
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
         @keyframes logoRotate {
           0%, 100% { transform: rotateY(0deg); }
