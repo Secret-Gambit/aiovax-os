@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AIOVAX Icon Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+    canvas { border: 1px solid #333; margin: 10px; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>AIOVAX Icon Generator</h1>
+  <p>Click buttons to generate and download PNG icons</p>
+  
+  <div id="canvases"></div>
+  
+  <script>
+    const sizes = [48, 72, 96, 128, 144, 192, 256, 512];
+    
+    function generateIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // Create gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#ffd700');
+      gradient.addColorStop(1, '#ffaa00');
+      
+      // Draw rounded rect
+      const radius = size * 0.2;
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fill();
+      
+      // Draw "A" text
+      ctx.fillStyle = '#000000';
+      ctx.font = `bold ${size * 0.6}px Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('A', size / 2, size * 0.55);
+      
+      return canvas;
+    }
+    
+    function downloadIcon(size) {
+      const canvas = generateIcon(size);
+      const link = document.createElement('a');
+      link.download = `icon-${size}x${size}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // Generate all sizes
+    sizes.forEach(size => {
+      const div = document.createElement('div');
+      div.style.display = 'inline-block';
+      div.style.textAlign = 'center';
+      
+      const canvas = generateIcon(size);
+      canvas.style.width = '100px';
+      canvas.style.height = '100px';
+      
+      const btn = document.createElement('button');
+      btn.textContent = `Download ${size}x${size}`;
+      btn.onclick = () => downloadIcon(size);
+      
+      const label = document.createElement('div');
+      label.textContent = `${size}x${size}`;
+      label.style.margin = '5px 0';
+      
+      div.appendChild(label);
+      div.appendChild(canvas);
+      div.appendChild(document.createElement('br'));
+      div.appendChild(btn);
+      
+      document.getElementById('canvases').appendChild(div);
+    });
+  </script>
+</body>
+</html>
