@@ -11,6 +11,7 @@ import {
   Trophy, 
   Settings,
   TrendingUp,
+  TrendingDown,
   Flame,
   Target
 } from 'lucide-react'
@@ -315,7 +316,7 @@ export function DesktopLayout({
   )
 }
 
-// Dashboard Overview Component
+// Dashboard Overview Component - Clean Bento-Style Layout
 function DashboardOverview({ 
   stats, 
   todayTrades, 
@@ -336,124 +337,221 @@ function DashboardOverview({
   onStartNewTrade: () => void
 }) {
   return (
-    <div className="dashboard-grid">
-      {/* Stats Row */}
-      <div className="dashboard-card col-3">
-        <div className="stat-label mb-1">Total Trades</div>
-        <div className="stat-value">{stats.allTime.totalTrades}</div>
-        <div className="mt-2 text-sm text-[var(--text-muted)]">
-          <span className="text-[var(--profit)]">{stats.today.wins}W</span> / 
-          <span className="text-[var(--loss)]"> {stats.today.losses}L</span> today
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Section: Key Metrics */}
+      <section>
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
+          Performance Overview
+        </h2>
+        <div className="grid grid-cols-4 gap-4">
+          {/* Total Trades Card */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)] hover:border-[var(--gold-primary)]/30 transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Trades</span>
+              <div className="w-8 h-8 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-[var(--gold-primary)]" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-[var(--text-primary)] mb-1">
+              {stats.allTime.totalTrades}
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-[var(--profit)] font-medium">{stats.today.wins}W</span>
+              <span className="text-[var(--text-muted)]">/</span>
+              <span className="text-[var(--loss)] font-medium">{stats.today.losses}L</span>
+              <span className="text-[var(--text-muted)] ml-1">today</span>
+            </div>
+          </div>
 
-      <div className="dashboard-card col-3">
-        <div className="stat-label mb-1">Net R</div>
-        <div className={`stat-value ${stats.allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'}`}>
-          {stats.allTime.netR >= 0 ? '+' : ''}{stats.allTime.netR.toFixed(2)}
-        </div>
-        <div className="mt-2 text-sm text-[var(--text-muted)]">
-          Avg: {stats.allTime.avgR.toFixed(2)}R per trade
-        </div>
-      </div>
+          {/* Net R Card */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)] hover:border-[var(--gold-primary)]/30 transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Net R</span>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                stats.allTime.netR >= 0 ? 'bg-[var(--profit-soft)]' : 'bg-[var(--loss-soft)]'
+              }`}>
+                <TrendingUp className={`w-4 h-4 ${
+                  stats.allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+                }`} />
+              </div>
+            </div>
+            <div className={`text-3xl font-bold mb-1 ${
+              stats.allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+            }`}>
+              {stats.allTime.netR >= 0 ? '+' : ''}{stats.allTime.netR.toFixed(2)}R
+            </div>
+            <div className="text-sm text-[var(--text-muted)]">
+              Avg {stats.allTime.avgR.toFixed(2)}R per trade
+            </div>
+          </div>
 
-      <div className="dashboard-card col-3">
-        <div className="stat-label mb-1">Win Rate</div>
-        <div className="stat-value text-[var(--gold-primary)]">{stats.allTime.winRate.toFixed(1)}%</div>
-        <div className="mt-2">
-          <WinRateGauge winRate={stats.allTime.winRate} totalTrades={stats.allTime.totalTrades} />
-        </div>
-      </div>
+          {/* Win Rate Card */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)] hover:border-[var(--gold-primary)]/30 transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Win Rate</span>
+              <div className="w-8 h-8 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                <Target className="w-4 h-4 text-[var(--gold-primary)]" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-[var(--gold-primary)] mb-1">
+              {stats.allTime.winRate.toFixed(1)}%
+            </div>
+            <div className="text-sm text-[var(--text-muted)]">
+              {stats.allTime.totalTrades > 0 ? Math.round(stats.allTime.winRate) : 0}% target
+            </div>
+          </div>
 
-      <div className="dashboard-card col-3">
-        <div className="stat-label mb-1">Discipline Score</div>
-        <div className="stat-value text-[var(--profit)]">
-          {stats.allTime.totalTrades > 0 
-            ? Math.round((stats.allTime.calmTrades / stats.allTime.totalTrades) * 100)
-            : 0}%
+          {/* Discipline Card */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)] hover:border-[var(--gold-primary)]/30 transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Discipline</span>
+              <div className="w-8 h-8 rounded-lg bg-[var(--profit-soft)] flex items-center justify-center">
+                <Flame className="w-4 h-4 text-[var(--profit)]" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-[var(--profit)] mb-1">
+              {stats.allTime.totalTrades > 0 
+                ? Math.round((stats.allTime.calmTrades / stats.allTime.totalTrades) * 100)
+                : 0}%
+            </div>
+            <div className="text-sm text-[var(--text-muted)]">
+              {stats.allTime.calmTrades} calm trades
+            </div>
+          </div>
         </div>
-        <div className="mt-2 text-sm text-[var(--text-muted)]">
-          {stats.allTime.calmTrades} calm / {stats.allTime.emotionalTrades} emotional
-        </div>
-      </div>
+      </section>
 
-      {/* Charts Row */}
-      <div className="dashboard-card col-6">
-        <div className="dashboard-card-header">
-          <span className="dashboard-card-title">R-Multiple Distribution</span>
-        </div>
-        <RMHistogram trades={allTimeTrades} />
-      </div>
+      {/* Section: Analytics */}
+      <section>
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
+          Analytics
+        </h2>
+        <div className="grid grid-cols-12 gap-4">
+          {/* R-Multiple Distribution - Takes 6 columns */}
+          <div className="col-span-6 bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[var(--text-primary)]">R-Multiple Distribution</h3>
+              <span className="text-xs text-[var(--text-muted)]">All time</span>
+            </div>
+            <RMHistogram trades={allTimeTrades} />
+          </div>
 
-      <div className="dashboard-card col-6">
-        <div className="dashboard-card-header">
-          <span className="dashboard-card-title">30-Day Performance</span>
-        </div>
-        <DailyHeatStrip trades={allTimeTrades} />
-      </div>
+          {/* 30-Day Heatmap - Takes 6 columns */}
+          <div className="col-span-6 bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[var(--text-primary)]">30-Day Performance</h3>
+              <span className="text-xs text-[var(--text-muted)]">Last 30 days</span>
+            </div>
+            <DailyHeatStrip trades={allTimeTrades} />
+          </div>
 
-      {/* Setup Performance */}
-      <div className="dashboard-card col-8">
-        <div className="dashboard-card-header">
-          <span className="dashboard-card-title">Setup Performance</span>
-        </div>
-        <SetupPerformanceBars trades={allTimeTrades} />
-      </div>
+          {/* Setup Performance - Takes 8 columns */}
+          <div className="col-span-8 bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[var(--text-primary)]">Setup Performance</h3>
+              <span className="text-xs text-[var(--text-muted)]">Win rate by setup</span>
+            </div>
+            <SetupPerformanceBars trades={allTimeTrades} />
+          </div>
 
-      <div className="dashboard-card col-4">
-        <div className="dashboard-card-header">
-          <span className="dashboard-card-title">Setup Trends</span>
+          {/* Setup Trends - Takes 4 columns */}
+          <div className="col-span-4 bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[var(--text-primary)]">Setup Trends</h3>
+              <span className="text-xs text-[var(--text-muted)]">20 trades</span>
+            </div>
+            <SetupTrends trades={allTimeTrades} />
+          </div>
         </div>
-        <SetupTrends trades={allTimeTrades} />
-      </div>
+      </section>
 
-      {/* Recent Trades */}
-      <div className="dashboard-card col-12">
-        <div className="dashboard-card-header">
-          <span className="dashboard-card-title">Recent Trades</span>
+      {/* Section: Recent Activity */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+            Recent Trades
+          </h2>
           <button 
             onClick={onStartNewTrade}
-            className="text-sm text-[var(--gold-primary)] hover:underline"
+            className="text-sm text-[var(--gold-primary)] hover:text-[var(--gold-secondary)] font-medium transition-colors"
           >
             View All
           </button>
         </div>
-        <div className="grid grid-cols-5 gap-4">
-          {todayTrades.slice(0, 5).map((trade) => (
-            <div 
-              key={trade.id}
-              className="p-4 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-soft)]"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-[var(--text-muted)]">
-                  {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                  trade.result === 'Win' ? 'bg-[var(--profit-soft)] text-[var(--profit)]' :
-                  trade.result === 'Loss' ? 'bg-[var(--loss-soft)] text-[var(--loss)]' :
-                  'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
-                }`}>
-                  {trade.result}
-                </span>
-              </div>
-              <div className="font-medium mb-1">{trade.setup.join(', ')}</div>
-              <div className={`text-lg font-bold ${
-                trade.result === 'Win' ? 'text-[var(--profit)]' :
-                trade.result === 'Loss' ? 'text-[var(--loss)]' :
-                'text-[var(--text-muted)]'
-              }`}>
-                {trade.result === 'Win' ? '+' : trade.result === 'Loss' ? '-' : ''}
-                {Math.abs(trade.rMultiple).toFixed(1)}R
-              </div>
+        
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-soft)] overflow-hidden">
+          {todayTrades.length > 0 ? (
+            <div className="divide-y divide-[var(--border-soft)]">
+              {todayTrades.slice(0, 5).map((trade) => (
+                <div 
+                  key={trade.id}
+                  className="flex items-center justify-between px-5 py-4 hover:bg-[var(--bg-tertiary)]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      trade.result === 'Win' ? 'bg-[var(--profit-soft)]' :
+                      trade.result === 'Loss' ? 'bg-[var(--loss-soft)]' :
+                      'bg-[var(--bg-tertiary)]'
+                    }`}>
+                      {trade.direction === 'buy' ? (
+                        <TrendingUp className={`w-5 h-5 ${
+                          trade.result === 'Win' ? 'text-[var(--profit)]' :
+                          trade.result === 'Loss' ? 'text-[var(--loss)]' :
+                          'text-[var(--text-muted)]'
+                        }`} />
+                      ) : (
+                        <TrendingDown className={`w-5 h-5 ${
+                          trade.result === 'Win' ? 'text-[var(--profit)]' :
+                          trade.result === 'Loss' ? 'text-[var(--loss)]' :
+                          'text-[var(--text-muted)]'
+                        }`} />
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-medium text-[var(--text-primary)]">
+                        {trade.setup.join(', ')}
+                      </div>
+                      <div className="text-sm text-[var(--text-muted)]">
+                        {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {trade.entryTrigger}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                      trade.result === 'Win' ? 'bg-[var(--profit-soft)] text-[var(--profit)]' :
+                      trade.result === 'Loss' ? 'bg-[var(--loss-soft)] text-[var(--loss)]' :
+                      'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+                    }`}>
+                      {trade.result}
+                    </span>
+                    <span className={`text-lg font-bold ${
+                      trade.result === 'Win' ? 'text-[var(--profit)]' :
+                      trade.result === 'Loss' ? 'text-[var(--loss)]' :
+                      'text-[var(--text-muted)]'
+                    }`}>
+                      {trade.result === 'Win' ? '+' : trade.result === 'Loss' ? '-' : ''}
+                      {Math.abs(trade.rMultiple).toFixed(1)}R
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-          {todayTrades.length === 0 && (
-            <div className="col-span-5 text-center py-8 text-[var(--text-muted)]">
-              No trades today. Click "Log Trade" to get started.
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center mx-auto mb-4">
+                <PlusCircle className="w-8 h-8 text-[var(--text-muted)]" />
+              </div>
+              <p className="text-[var(--text-muted)] mb-2">No trades today</p>
+              <button 
+                onClick={onStartNewTrade}
+                className="text-[var(--gold-primary)] font-medium hover:underline"
+              >
+                Log your first trade
+              </button>
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }
