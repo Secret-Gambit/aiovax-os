@@ -556,7 +556,7 @@ function DashboardOverview({
   )
 }
 
-// Analytics View Component - Clean Section-Based Layout
+// Analytics View Component - Organized Grid Layout with Profit Factor
 function AnalyticsView({ 
   stats,
   allTimeTrades,
@@ -566,168 +566,235 @@ function AnalyticsView({
   allTimeTrades: Trade[]
   todayTrades: Trade[]
 }) {
+  // Calculate profit factor
+  const winningTrades = allTimeTrades.filter(t => t.result === 'Win')
+  const losingTrades = allTimeTrades.filter(t => t.result === 'Loss')
+  const grossProfit = winningTrades.reduce((sum, t) => sum + t.rMultiple, 0)
+  const grossLoss = Math.abs(losingTrades.reduce((sum, t) => sum + Math.abs(t.rMultiple), 0))
+  const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? Infinity : 0)
+  
+  // Calculate expectancy
+  const avgWin = winningTrades.length > 0 ? grossProfit / winningTrades.length : 0
+  const avgLoss = losingTrades.length > 0 ? grossLoss / losingTrades.length : 0
+  const winRate = stats.allTime.winRate / 100
+  const expectancy = (winRate * avgWin) - ((1 - winRate) * avgLoss)
+
   return (
-    <div className="space-y-8">
-      {/* Section: Performance Metrics */}
+    <div className="space-y-6">
+      {/* Section: Key Metrics Grid - 2x2 Layout */}
       <section>
         <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-          Performance Metrics
+          Key Metrics
         </h2>
-        <div className="grid grid-cols-3 gap-5">
-          {/* Win Rate Card */}
-          <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Win Rate</span>
-              <div className="w-8 h-8 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
-                <Target className="w-4 h-4 text-[var(--gold-primary)]" />
+        <div className="grid grid-cols-4 gap-4">
+          {/* Win Rate */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                <Target className="w-5 h-5 text-[var(--gold-primary)]" />
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Win Rate</p>
+                <p className="text-2xl font-bold text-[var(--gold-primary)]">{stats.allTime.winRate.toFixed(1)}%</p>
               </div>
             </div>
-            <div className="flex items-center justify-center py-4">
-              <WinRateGauge winRate={stats.allTime.winRate} totalTrades={stats.allTime.totalTrades} />
-            </div>
-            <div className="text-center mt-2">
-              <span className="text-2xl font-bold text-[var(--gold-primary)]">{stats.allTime.winRate.toFixed(1)}%</span>
-              <p className="text-xs text-[var(--text-muted)] mt-1">Based on {stats.allTime.totalTrades} trades</p>
-            </div>
+            <WinRateGauge winRate={stats.allTime.winRate} totalTrades={stats.allTime.totalTrades} />
           </div>
 
-          {/* Discipline Score Card */}
-          <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Discipline Score</span>
-              <div className="w-8 h-8 rounded-lg bg-[var(--profit-soft)] flex items-center justify-center">
-                <Flame className="w-4 h-4 text-[var(--profit)]" />
+          {/* Net R */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                stats.allTime.netR >= 0 ? 'bg-[var(--profit-soft)]' : 'bg-[var(--loss-soft)]'
+              }`}>
+                <TrendingUp className={`w-5 h-5 ${
+                  stats.allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+                }`} />
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Net R</p>
+                <p className={`text-2xl font-bold ${
+                  stats.allTime.netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+                }`}>
+                  {stats.allTime.netR >= 0 ? '+' : ''}{stats.allTime.netR.toFixed(2)}R
+                </p>
               </div>
             </div>
-            <div className="flex items-center justify-center py-4">
-              <DisciplineScoreRing 
-                calmTrades={stats.allTime.calmTrades} 
-                emotionalTrades={stats.allTime.emotionalTrades}
-                totalTrades={stats.allTime.totalTrades}
-              />
-            </div>
-            <div className="text-center mt-2">
-              <span className="text-2xl font-bold text-[var(--profit)]">
-                {stats.allTime.totalTrades > 0 
-                  ? Math.round((stats.allTime.calmTrades / stats.allTime.totalTrades) * 100)
-                  : 0}%
-              </span>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
-                {stats.allTime.calmTrades} calm / {stats.allTime.emotionalTrades} emotional
-              </p>
-            </div>
+            <p className="text-sm text-[var(--text-muted)]">
+              {winningTrades.length}W / {losingTrades.length}L trades
+            </p>
           </div>
 
-          {/* Streak Card */}
-          <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Current Streak</span>
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+          {/* Profit Factor */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                profitFactor >= 1.5 ? 'bg-[var(--profit-soft)]' : 
+                profitFactor >= 1 ? 'bg-[var(--gold-soft)]' : 'bg-[var(--loss-soft)]'
+              }`}>
+                <BarChart3 className={`w-5 h-5 ${
+                  profitFactor >= 1.5 ? 'text-[var(--profit)]' : 
+                  profitFactor >= 1 ? 'text-[var(--gold-primary)]' : 'text-[var(--loss)]'
+                }`} />
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Profit Factor</p>
+                <p className={`text-2xl font-bold ${
+                  profitFactor >= 1.5 ? 'text-[var(--profit)]' : 
+                  profitFactor >= 1 ? 'text-[var(--gold-primary)]' : 'text-[var(--loss)]'
+                }`}>
+                  {profitFactor === Infinity ? '∞' : profitFactor.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--text-muted)]">
+              {profitFactor >= 2 ? 'Excellent' : profitFactor >= 1.5 ? 'Good' : profitFactor >= 1 ? 'Break-even' : 'Poor'}
+            </p>
+          </div>
+
+          {/* Expectancy */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                expectancy > 0 ? 'bg-[var(--profit-soft)]' : 'bg-[var(--loss-soft)]'
+              }`}>
+                <TrendingUp className={`w-5 h-5 ${
+                  expectancy > 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+                }`} />
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Expectancy</p>
+                <p className={`text-2xl font-bold ${
+                  expectancy > 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+                }`}>
+                  {expectancy > 0 ? '+' : ''}{expectancy.toFixed(2)}R
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--text-muted)]">
+              Expected return per trade
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Secondary Metrics */}
+      <section>
+        <div className="grid grid-cols-3 gap-4">
+          {/* Discipline Score */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-[var(--profit-soft)] flex items-center justify-center">
+                <Flame className="w-5 h-5 text-[var(--profit)]" />
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Discipline</p>
+                <p className="text-xl font-bold text-[var(--profit)]">
+                  {stats.allTime.totalTrades > 0 
+                    ? Math.round((stats.allTime.calmTrades / stats.allTime.totalTrades) * 100)
+                    : 0}%
+                </p>
+              </div>
+            </div>
+            <DisciplineScoreRing 
+              calmTrades={stats.allTime.calmTrades} 
+              emotionalTrades={stats.allTime.emotionalTrades}
+              totalTrades={stats.allTime.totalTrades}
+            />
+          </div>
+
+          {/* Streak */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                 stats.today.streak > 0 ? 'bg-[var(--profit-soft)]' : 
                 stats.today.streak < 0 ? 'bg-[var(--loss-soft)]' : 'bg-[var(--bg-tertiary)]'
               }`}>
-                <Flame className={`w-4 h-4 ${
+                <Flame className={`w-5 h-5 ${
                   stats.today.streak > 0 ? 'text-[var(--profit)]' : 
                   stats.today.streak < 0 ? 'text-[var(--loss)]' : 'text-[var(--text-muted)]'
                 }`} />
               </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Streak</p>
+                <p className={`text-xl font-bold ${
+                  stats.today.streak > 0 ? 'text-[var(--profit)]' : 
+                  stats.today.streak < 0 ? 'text-[var(--loss)]' : 'text-[var(--text-muted)]'
+                }`}>
+                  {stats.today.streak !== 0 ? `${Math.abs(stats.today.streak)} ${stats.today.streak > 0 ? 'Win' : 'Loss'}` : 'None'}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center justify-center py-4">
-              <StreakVisualizer streak={stats.today.streak} streakType={stats.today.streakType} />
+            <StreakVisualizer streak={stats.today.streak} streakType={stats.today.streakType} />
+          </div>
+
+          {/* Total Trades */}
+          <div className="bg-[var(--bg-card)] rounded-xl p-5 border border-[var(--border-soft)]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-[var(--gold-primary)]" />
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Trades</p>
+                <p className="text-xl font-bold text-[var(--text-primary)]">{stats.allTime.totalTrades}</p>
+              </div>
             </div>
-            <div className="text-center mt-2">
-              <span className={`text-2xl font-bold ${
-                stats.today.streak > 0 ? 'text-[var(--profit)]' : 
-                stats.today.streak < 0 ? 'text-[var(--loss)]' : 'text-[var(--text-muted)]'
-              }`}>
-                {stats.today.streak !== 0 ? Math.abs(stats.today.streak) : '-'}
-                {stats.today.streak > 0 ? ' Win' : stats.today.streak < 0 ? ' Loss' : ' No streak'}
-              </span>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
-                {stats.today.streak > 0 ? 'Keep it going!' : stats.today.streak < 0 ? 'Break the cycle' : 'Start trading'}
-              </p>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-[var(--profit)]">{winningTrades.length} wins</span>
+              <span className="text-[var(--text-muted)]">/</span>
+              <span className="text-[var(--loss)]">{losingTrades.length} losses</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section: Trade Analysis */}
-      <section>
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-          Trade Analysis
-        </h2>
+      {/* Section: Charts Row 1 */}
+      <section className="grid grid-cols-2 gap-5">
         <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-semibold text-[var(--text-primary)]">R-Multiple Distribution</h3>
-              <p className="text-sm text-[var(--text-muted)]">How your trades are distributed by R-multiple</p>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-[var(--profit)]" />
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-[var(--text-primary)]">R-Multiple Distribution</h3>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded bg-[var(--profit)]" />
                 <span className="text-[var(--text-muted)]">Win</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-[var(--loss)]" />
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded bg-[var(--loss)]" />
                 <span className="text-[var(--text-muted)]">Loss</span>
               </div>
             </div>
           </div>
           <RMHistogram trades={allTimeTrades} />
         </div>
-      </section>
 
-      {/* Section: Setup Analysis */}
-      <section>
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-          Setup Analysis
-        </h2>
-        <div className="grid grid-cols-2 gap-5">
-          <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-            <div className="mb-4">
-              <h3 className="font-semibold text-[var(--text-primary)]">Setup Performance</h3>
-              <p className="text-sm text-[var(--text-muted)]">Win rate and net R by setup type</p>
-            </div>
-            <SetupPerformanceBars trades={allTimeTrades} />
-          </div>
-
-          <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-            <div className="mb-4">
-              <h3 className="font-semibold text-[var(--text-primary)]">Setup Trends</h3>
-              <p className="text-sm text-[var(--text-muted)]">Win rate trend over last 20 trades</p>
-            </div>
-            <SetupTrends trades={allTimeTrades} />
-          </div>
-        </div>
-      </section>
-
-      {/* Section: Time Analysis */}
-      <section>
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
-          Time Analysis
-        </h2>
         <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-semibold text-[var(--text-primary)]">Daily Performance Heatmap</h3>
-              <p className="text-sm text-[var(--text-muted)]">Last 30 days of trading performance</p>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-[var(--profit)]" />
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-[var(--text-primary)]">30-Day Performance</h3>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded bg-[var(--profit)]" />
                 <span className="text-[var(--text-muted)]">Profit</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-[var(--loss)]" />
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded bg-[var(--loss)]" />
                 <span className="text-[var(--text-muted)]">Loss</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-[var(--bg-tertiary)]" />
-                <span className="text-[var(--text-muted)]">No trades</span>
               </div>
             </div>
           </div>
           <DailyHeatStrip trades={allTimeTrades} />
+        </div>
+      </section>
+
+      {/* Section: Charts Row 2 */}
+      <section className="grid grid-cols-2 gap-5">
+        <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
+          <h3 className="font-semibold text-[var(--text-primary)] mb-4">Setup Performance</h3>
+          <SetupPerformanceBars trades={allTimeTrades} />
+        </div>
+
+        <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)]">
+          <h3 className="font-semibold text-[var(--text-primary)] mb-4">Setup Trends (20 trades)</h3>
+          <SetupTrends trades={allTimeTrades} />
         </div>
       </section>
     </div>
