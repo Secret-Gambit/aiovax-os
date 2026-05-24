@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react'
 import { themeColors, type ThemeColor } from '../hooks/useTheme'
 
+// Read theme synchronously to prevent flash of wrong color
+const getSavedTheme = (): ThemeColor => {
+  if (typeof window === 'undefined') return 'gold'
+  const saved = localStorage.getItem('trading-journal-theme') as ThemeColor
+  return saved && themeColors[saved] ? saved : 'gold'
+}
+
 export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0)
   const [messageIndex, setMessageIndex] = useState(0)
-  const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
-
-  // Load theme on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
-    if (savedTheme && themeColors[savedTheme]) {
-      setCurrentTheme(savedTheme)
-    }
-  }, [])
+  const [currentTheme] = useState<ThemeColor>(getSavedTheme())
 
   const colors = themeColors[currentTheme]
 
@@ -127,7 +126,9 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
           background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.primary} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          backgroundClip: 'text',
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+          textShadow: `0 0 30px ${colors.primary}40`
         }}
       >
         AIOVAX
