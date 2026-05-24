@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Trade } from './types/trade'
 import type { ChallengeSetupInput } from './types/challenge'
+import { Home, Plus, History as HistoryIcon, BarChart3, Trophy, Settings } from 'lucide-react'
 import { HomeDashboard } from './components/HomeDashboard'
 import { QuickLogger } from './components/QuickLogger'
 import { Insights } from './components/Insights'
@@ -307,8 +308,17 @@ function App() {
           <div className="flex items-center gap-2">
             <span className="font-bold text-lg tracking-tight">AIOVAX</span>
           </div>
-          <div className="pill-gold">
-            {stats.today.netR >= 0 ? '+' : ''}{stats.today.netR.toFixed(1)}R
+          <div className="flex items-center gap-3">
+            <div className="pill-gold">
+              {stats.today.netR >= 0 ? '+' : ''}{stats.today.netR.toFixed(1)}R
+            </div>
+            <button
+              onClick={() => setCurrentScreen('settings')}
+              className="w-10 h-10 rounded-full bg-[var(--bg-card)] border border-[var(--border-soft)] flex items-center justify-center tap-target"
+              title="Settings"
+            >
+              <Settings size={18} className="text-[var(--text-muted)]" />
+            </button>
           </div>
         </header>
 
@@ -321,22 +331,25 @@ function App() {
         <nav className="flex-none px-4 pb-6 pt-2">
           <div className="flex items-center justify-around">
             {[
-              { id: 'home', icon: 'H', label: 'Home' },
-              { id: 'logger', icon: '+', label: 'Trade' },
-              { id: 'history', icon: 'L', label: 'History' },
-              { id: 'insights', icon: 'S', label: 'Stats' },
-              { id: 'settings', icon: '⚙', label: 'Settings' },
+              { id: 'home', Icon: Home, label: 'Home' },
+              { id: 'history', Icon: HistoryIcon, label: 'History' },
+              { id: 'logger', Icon: Plus, label: 'Trade', isCenter: true },
+              { id: 'insights', Icon: BarChart3, label: 'Analytics' },
+              { id: 'challenge', Icon: Trophy, label: 'Challenge' },
             ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setCurrentScreen(item.id as Screen)}
-                className="flex flex-col items-center gap-1 py-2 px-2 tap-target touch-manipulation"
+                className={`flex flex-col items-center tap-target touch-manipulation ${item.isCenter ? 'relative -top-3' : 'gap-1 py-2 px-1'}`}
               >
-                <span className={`text-lg font-bold ${currentScreen === item.id ? 'gold-text' : ''}`}
-                  style={{ color: currentScreen === item.id ? 'var(--gold-primary)' : 'var(--text-muted)' }}>
-                  {item.icon}
-                </span>
-                <span className="text-[10px]" style={{
+                {item.isCenter ? (
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg ${currentScreen === item.id ? 'gold-accent' : 'bg-[var(--bg-card)] border border-[var(--border-soft)]'}`}>
+                    <item.Icon size={24} className={currentScreen === item.id ? 'text-black' : 'text-[var(--gold-primary)]'} />
+                  </div>
+                ) : (
+                  <item.Icon size={20} className={currentScreen === item.id ? 'text-[var(--gold-primary)]' : 'text-[var(--text-muted)]'} />
+                )}
+                <span className={`text-[10px] ${item.isCenter ? 'mt-1' : ''}`} style={{
                   color: currentScreen === item.id ? 'var(--gold-primary)' : 'var(--text-muted)',
                   fontWeight: currentScreen === item.id ? 600 : 400
                 }}>
