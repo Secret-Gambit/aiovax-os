@@ -13,6 +13,7 @@ import { Onboarding } from './components/Onboarding'
 import { MobileSettings } from './components/MobileSettings'
 import { InstallPrompt } from './components/InstallPrompt'
 import { DynamicFavicon } from './components/DynamicFavicon'
+import { LoadingScreen } from './components/LoadingScreen'
 import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
@@ -25,6 +26,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home')
   const [duplicateTrade, setDuplicateTrade] = useState<Trade | null>(null)
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null)
+  const [showLoading, setShowLoading] = useState(true)
   const {
     todayTrades,
     allTimeTrades,
@@ -276,6 +278,11 @@ function App() {
           onComplete={handleOnboardingComplete}
           onSkip={handleSkipOnboarding}
         />
+      )}
+
+      {/* Loading Screen - shows for 5 seconds on every app open */}
+      {showLoading && (
+        <LoadingScreen onComplete={() => setShowLoading(false)} />
       )}
 
       {/* Install Prompt */}
