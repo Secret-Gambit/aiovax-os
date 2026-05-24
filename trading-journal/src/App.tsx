@@ -12,6 +12,7 @@ import { DesktopLayout } from './components/DesktopLayout'
 import { Onboarding } from './components/Onboarding'
 import { MobileSettings } from './components/MobileSettings'
 import { InstallPrompt } from './components/InstallPrompt'
+import { DynamicFavicon } from './components/DynamicFavicon'
 import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
@@ -266,6 +267,9 @@ function App() {
 
   return (
     <>
+      {/* Dynamic Favicon */}
+      <DynamicFavicon />
+
       {/* Onboarding Modal */}
       {showOnboarding && (
         <Onboarding 
