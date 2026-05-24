@@ -67,6 +67,8 @@ export function QuickLogger({
 
   // Voice recognition state
   const [isListening, setIsListening] = useState(false)
+  const [interimTranscript, setInterimTranscript] = useState('')
+  const [voiceError, setVoiceError] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
 
   const toggleSetup = useCallback((s: SetupType) => {
@@ -202,10 +204,11 @@ export function QuickLogger({
   // Voice recognition functions
   const startListening = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Voice recognition not supported in this browser')
+      setVoiceError('Voice recognition not supported. Try Chrome or Edge.')
       return
     }
 
+    setVoiceError(null)
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     recognitionRef.current = new SpeechRecognition()
     recognitionRef.current.continuous = true
@@ -214,27 +217,42 @@ export function QuickLogger({
 
     recognitionRef.current.onresult = (event: any) => {
       let finalTranscript = ''
-      let interimTranscript = ''
+      let interim = ''
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript
         if (event.results[i].isFinal) {
-          finalTranscript += transcript
+          finalTranscript += transcript + ' '
         } else {
-          interimTranscript += transcript
+          interim += transcript
         }
       }
 
-      setNotes(prev => prev + finalTranscript + interimTranscript)
+      if (finalTranscript) {
+        setNotes(prev => {
+          const newText = prev + (prev ? ' ' : '') + finalTranscript.trim()
+          return newText
+        })
+      }
+      setInterimTranscript(interim)
     }
 
     recognitionRef.current.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error)
+      if (event.error === 'no-speech') {
+        setVoiceError('No speech detected. Try speaking louder.')
+      } else if (event.error === 'audio-capture') {
+        setVoiceError('Microphone not found. Check audio settings.')
+      } else if (event.error === 'not-allowed') {
+        setVoiceError('Mic permission denied. Allow access in browser.')
+      } else {
+        setVoiceError(`Error: ${event.error}`)
+      }
       setIsListening(false)
     }
 
     recognitionRef.current.onend = () => {
       setIsListening(false)
+      setInterimTranscript('')
     }
 
     recognitionRef.current.start()
@@ -247,6 +265,7 @@ export function QuickLogger({
       recognitionRef.current = null
     }
     setIsListening(false)
+    setInterimTranscript('')
   }
 
   const toggleListening = () => {
@@ -494,70 +513,145 @@ export function QuickLogger({
             <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>NOTES</p>
             <button
               onClick={toggleListening}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs tap-target touch-manipulation transition-all ${
-                isListening ? 'loss-solid' : 'phone-card select-inactive'
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium tap-target touch-manipulation transition-all ${
+                isListening 
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/50' 
+                  : 'phone-card select-inactive'
               }`}
             >
               {isListening ? <MicOff size={14} /> : <Mic size={14} />}
               {isListening ? 'Stop' : 'Speak'}
             </button>
           </div>
-          <div className="phone-card rounded-xl p-3">
+          <div className={`phone-card rounded-xl p-3 transition-all ${isListening ? 'ring-2 ring-red-500/30' : ''}`}>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add trade details (type or speak)..."
+              placeholder="Add trade details (type or tap Speak to dictate)..."
               className="w-full bg-transparent text-sm resize-none outline-none"
-              style={{ color: 'var(--text-primary)', minHeight: '60px' }}
-              rows={3}
+              style={{ color: 'var(--text-primary)', minHeight: '80px' }}
+              rows={4}
             />
-            {isListening && (
+            
+            {/* Voice Error */}
+            {voiceError && (
               <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Listening...</p>
+                <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <span className="text-red-400 text-xs">!</span>
+                </div>
+                <p className="text-xs text-red-400">{voiceError}</p>
+              </div>
+            )}
+            
+            {/* Listening State with Waveform */}
+            {isListening && (
+              <div className="mt-2 pt-2 border-t border-white/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-end gap-0.5 h-5">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-red-400 rounded-full animate-pulse"
+                        style={{
+                          height: `${Math.random() * 100}%`,
+                          animationDelay: `${i * 0.1}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-red-400 font-medium">Listening...</p>
+                </div>
+                
+                {/* Live Transcript Preview */}
+                {interimTranscript && (
+                  <p className="text-xs text-[var(--text-muted)] italic">
+                    "{interimTranscript}"
+                  </p>
+                )}
               </div>
             )}
           </div>
         </section>
 
-        {/* Image Upload */}
+        {/* Image Upload - Drag & Drop */}
         <section>
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>CHART SCREENSHOT</p>
+            {image && (
+              <button
+                onClick={handleRemoveImage}
+                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+              >
+                Remove
+              </button>
+            )}
           </div>
+          
           {image ? (
-            <div className="phone-card rounded-xl p-2">
-              <div className="relative">
+            <div className="phone-card rounded-xl p-3">
+              <div className="relative group">
                 <img 
                   src={image} 
                   alt="Trade chart" 
-                  className="w-full h-32 object-cover rounded-lg"
+                  className="w-full h-48 object-contain rounded-lg bg-black/50"
                 />
-                <button
-                  onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-lg flex items-center justify-center tap-target"
-                  style={{ background: 'rgba(0,0,0,0.7)', color: 'white' }}
-                  title="Remove image"
-                >
-                  <X size={16} />
-                </button>
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  <button
+                    onClick={handleRemoveImage}
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium tap-target"
+                  >
+                    Remove Image
+                  </button>
+                </div>
               </div>
+              <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
+                Tap image to view, hover for options
+              </p>
             </div>
           ) : (
-            <label className="phone-card rounded-xl p-4 flex flex-col items-center gap-2 tap-target touch-manipulation cursor-pointer hover:bg-white/5 transition-colors">
+            <label 
+              className="phone-card rounded-xl p-6 flex flex-col items-center gap-3 tap-target touch-manipulation cursor-pointer hover:bg-white/5 transition-colors border-2 border-dashed border-[var(--border-soft)] hover:border-[var(--gold-primary)]/50"
+              onDragOver={(e) => {
+                e.preventDefault()
+                e.currentTarget.classList.add('border-[var(--gold-primary)]', 'bg-[var(--gold-soft)]')
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.classList.remove('border-[var(--gold-primary)]', 'bg-[var(--gold-soft)]')
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                e.currentTarget.classList.remove('border-[var(--gold-primary)]', 'bg-[var(--gold-soft)]')
+                const file = e.dataTransfer.files?.[0]
+                if (file && file.type.startsWith('image/')) {
+                  const reader = new FileReader()
+                  reader.onload = async (event) => {
+                    const base64 = event.target?.result as string
+                    if (base64) {
+                      const compressed = await compressImage(base64)
+                      setImage(compressed)
+                    }
+                  }
+                  reader.readAsDataURL(file)
+                }
+              }}
+            >
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="hidden"
               />
-              <Camera size={24} style={{ color: 'var(--text-muted)' }} />
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Tap to add chart screenshot (optional)
-              </span>
-              <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                Max 5MB, auto-compressed
-              </span>
+              <div className="w-12 h-12 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
+                <Camera size={24} className="text-[var(--text-muted)]" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">
+                  Tap to upload or drag & drop
+                </p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  Supports: JPG, PNG, WebP (max 5MB)
+                </p>
+              </div>
             </label>
           )}
         </section>
