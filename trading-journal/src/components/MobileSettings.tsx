@@ -7,7 +7,8 @@ import {
   Download,
   ChevronRight,
   Check,
-  User
+  User,
+  Smartphone
 } from 'lucide-react'
 import { themeColors, type ThemeColor } from '../hooks/useTheme'
 
@@ -15,12 +16,19 @@ interface MobileSettingsProps {
   onResetAllData: () => void
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
 export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
   const [activeSection, setActiveSection] = useState<'general' | 'data' | 'about'>('general')
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
   const [traderName, setTraderName] = useState('')
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [isInstalled, setIsInstalled] = useState(false)
 
-  // Load saved preferences
+  // Load saved preferences and check install status
   useEffect(() => {
     const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
     const savedName = localStorage.getItem('trading-journal-trader-name')
@@ -29,6 +37,23 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
     }
     if (savedName) {
       setTraderName(savedName)
+    }
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        (window.navigator as any).standalone === true) {
+      setIsInstalled(true)
+    }
+
+    // Listen for install prompt
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setInstallPrompt(e as BeforeInstallPromptEvent)
+    }
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
   }, [])
 
@@ -223,6 +248,33 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
                 <span className="text-xs text-[var(--text-muted)]">v1.0.0</span>
               </div>
             </div>
+
+            {/* Install App Button */}
+            {!isInstalled && installPrompt && (
+              <button
+                onClick={async () => {
+                  if (!installPrompt) return
+                  installPrompt.prompt()
+                  const { outcome } = await installPrompt.userChoice
+                  if (outcome === 'accepted') {
+                    setIsInstalled(true)
+                  }
+                  setInstallPrompt(null)
+                }}
+                className="w-full flex items-center justify-between p-4 rounded-xl gold-accent tap-target"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-black/20 flex items-center justify-center">
+                    <Smartphone className="w-5 h-5 text-black" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-black">Install App</p>
+                    <p className="text-xs text-black/70">Add to home screen</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-black/70" />
+              </button>
+            )}
 
             <div className="phone-card rounded-xl p-4">
               <h3 className="font-semibold text-[var(--text-primary)] mb-3">Features</h3>
