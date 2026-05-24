@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react'
 import { TrendingUp, TrendingDown, Check, Mic, MicOff, Save, X, ChevronDown, FileText, Camera, Image as ImageIcon } from 'lucide-react'
 import type { Trade, Direction, SetupType, EntryTrigger, MarketContext, Emotion, Result, TradeTemplate } from '../types/trade'
-import { SETUP_OPTIONS, ENTRY_TRIGGERS, EMOTIONS, RESULTS, SNAP_POINTS } from '../types/trade'
+import { SETUP_OPTIONS, ENTRY_TRIGGERS, RESULTS, SNAP_POINTS } from '../types/trade'
+import { EmotionIntensitySlider } from './visualizations'
 
 interface QuickLoggerProps {
   onTradeLogged: () => void
@@ -31,6 +32,29 @@ export function QuickLogger({
   const [entryTrigger, setEntryTrigger] = useState<EntryTrigger | null>(editingTrade?.entryTrigger || initialTrade?.entryTrigger || null)
   const [marketContext, setMarketContext] = useState<MarketContext | null>(editingTrade?.marketContext || initialTrade?.marketContext || null)
   const [emotion, setEmotion] = useState<Emotion | null>(editingTrade?.emotion || initialTrade?.emotion || null)
+  const [emotionIntensity, setEmotionIntensity] = useState(() => {
+    const e = editingTrade?.emotion || initialTrade?.emotion
+    if (e === 'Calm') return 0
+    if (e === 'Confident') return 25
+    if (e === 'Impatient') return 50
+    if (e === 'Fearful') return 75
+    if (e === 'Revenge Trading') return 100
+    return 25
+  })
+  
+  // Helper to convert intensity to emotion type
+  const getEmotionFromIntensity = (intensity: number): Emotion => {
+    if (intensity <= 12) return 'Calm'
+    if (intensity <= 37) return 'Confident'
+    if (intensity <= 62) return 'Impatient'
+    if (intensity <= 87) return 'Fearful'
+    return 'Revenge Trading'
+  }
+  
+  const handleEmotionIntensityChange = (intensity: number) => {
+    setEmotionIntensity(intensity)
+    setEmotion(getEmotionFromIntensity(intensity))
+  }
   const [result, setResult] = useState<Result | null>(editingTrade?.result || null)
   const [rMultiple, setRMultiple] = useState<number>(editingTrade?.rMultiple || 0)
   const [notes, setNotes] = useState<string>(editingTrade?.notes || (initialTrade?.setup ? `Copied from: ${initialTrade.setup.join(', ')}` : ''))
@@ -403,22 +427,12 @@ export function QuickLogger({
           </div>
         </section>
 
-        {/* Emotion - Compact grid */}
+        {/* Emotion - Intensity Slider */}
         <section>
-          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>EMOTION</p>
-          <div className="grid grid-cols-3 gap-2">
-            {EMOTIONS.map(e => (
-              <button
-                key={e}
-                onClick={() => setEmotion(e)}
-                className={`py-2 rounded-xl text-xs font-medium tap-target touch-manipulation transition-all text-center leading-tight ${
-                  emotion === e ? 'select-active' : 'phone-card select-inactive'
-                }`}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
+          <EmotionIntensitySlider 
+            value={emotionIntensity}
+            onChange={handleEmotionIntensityChange}
+          />
         </section>
 
         {/* Result - Compact */}

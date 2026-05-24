@@ -119,7 +119,10 @@ function App() {
       case 'insights':
         return (
           <Insights
-            stats={stats}
+            stats={{
+              allTime: stats.allTime,
+              today: { streak: stats.today.streak, streakType: stats.today.streakType }
+            }}
             todayTrades={todayTrades}
             allTimeTrades={allTimeTrades}
             deleteTrade={deleteTrade}

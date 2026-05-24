@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Trade } from '../types/trade'
 import { TrendingUp, TrendingDown, Zap, BarChart3, Play, X, ChevronLeft, ChevronRight, CheckCircle2, XCircle, MinusCircle, Smile, Frown, AlertTriangle, Flame, Meh, Calendar } from 'lucide-react'
 import { Calendar as CalendarComponent } from './Calendar'
+import { RMHistogram, SetupPerformanceBars, DailyHeatStrip, WinRateGauge, DisciplineScoreRing, SetupTrends } from './visualizations'
 
 interface InsightsProps {
   stats: {
@@ -19,6 +20,10 @@ interface InsightsProps {
       pctCalm: number
       emotionalWinRate: number
       calmWinRate: number
+    }
+    today: {
+      streak: number
+      streakType: 'win' | 'loss' | null
     }
   }
   todayTrades: Trade[]
@@ -304,89 +309,30 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade }: Ins
           </button>
         )}
 
-        {/* Performance Overview */}
-        <section className="phone-card rounded-2xl p-4">
-          <p className="text-xs font-semibold mb-3 gold-text">PERFORMANCE</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="phone-card p-3">
-              <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Win Rate</p>
-              <p className="text-2xl font-bold">{allTime.winRate.toFixed(0)}%</p>
-            </div>
-            <div className="phone-card p-3">
-              <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Total R</p>
-              <p className={`text-2xl font-bold ${allTime.netR >= 0 ? 'status-profit' : 'status-loss'}`}>
-                {allTime.netR >= 0 ? '+' : ''}{allTime.netR.toFixed(1)}R
-              </p>
-            </div>
-            <div className="phone-card p-3">
-              <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Trades</p>
-              <p className="text-2xl font-bold">{allTime.totalTrades}</p>
-            </div>
-            <div className="phone-card p-3">
-              <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Avg R</p>
-              <p className={`text-2xl font-bold ${allTime.avgR >= 0 ? 'status-profit' : 'status-loss'}`}>
-                {allTime.avgR >= 0 ? '+' : ''}{allTime.avgR.toFixed(2)}R
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* R-Multiple Histogram */}
+        <RMHistogram trades={allTimeTrades} />
 
-        {/* Setup Performance */}
-        {setups.length > 0 && (
-          <section className="phone-card rounded-2xl p-4">
-            <p className="text-xs font-semibold mb-3 gold-text">SETUPS</p>
+        {/* Win Rate Gauge & Discipline Ring */}
+        <div className="grid grid-cols-2 gap-3">
+          <WinRateGauge 
+            winRate={allTime.winRate} 
+            totalTrades={allTime.totalTrades} 
+          />
+          <DisciplineScoreRing 
+            calmTrades={allTime.calmTrades}
+            emotionalTrades={allTime.emotionalTrades}
+            totalTrades={allTime.totalTrades}
+          />
+        </div>
 
-            {/* Best/Worst setups */}
-            <div className="space-y-2 mb-3">
-              {allTime.bestSetup && (
-                <div className="phone-card rounded-xl p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--profit-soft)' }}>
-                      <TrendingUp size={16} style={{ color: 'var(--profit)' }} />
-                    </div>
-                    <div>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Best</p>
-                      <p className="font-semibold text-sm">{allTime.bestSetup}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-bold status-profit">+{setups.find(s => s.name === allTime.bestSetup)?.netR.toFixed(1)}R</span>
-                </div>
-              )}
-              {allTime.worstSetup && (
-                <div className="phone-card rounded-xl p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--loss-soft)' }}>
-                      <TrendingDown size={16} style={{ color: 'var(--loss)' }} />
-                    </div>
-                    <div>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Worst</p>
-                      <p className="font-semibold text-sm">{allTime.worstSetup}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-bold status-loss">{setups.find(s => s.name === allTime.worstSetup)?.netR.toFixed(1)}R</span>
-                </div>
-              )}
-            </div>
+        {/* Daily Performance Heat Strip */}
+        <DailyHeatStrip trades={allTimeTrades} />
 
-            {/* Setup list */}
-            <div className="space-y-1">
-              {setups.slice(0, 5).map(setup => (
-                <div key={setup.name} className="flex items-center justify-between py-2 px-2 rounded-lg"
-                  style={{ borderBottom: '1px solid var(--border-soft)' }}>
-                  <span className="text-sm font-medium">{setup.name}</span>
-                  <div className="text-right flex items-center gap-2">
-                    <span className={`text-sm font-bold ${setup.netR >= 0 ? 'status-profit' : 'status-loss'}`}>
-                      {setup.netR >= 0 ? '+' : ''}{setup.netR.toFixed(1)}R
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
-                      {setup.winRate.toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Setup Performance Bars */}
+        <SetupPerformanceBars trades={allTimeTrades} />
+
+        {/* Setup Trends Sparklines */}
+        <SetupTrends trades={allTimeTrades} />
 
         {/* Emotion Analytics */}
         <section className="phone-card rounded-2xl p-4">

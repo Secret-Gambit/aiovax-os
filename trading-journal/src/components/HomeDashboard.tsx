@@ -3,6 +3,7 @@ import type { Trade } from '../types/trade'
 import type { DisciplineAlert } from '../hooks/useTrades'
 import type { WeeklyGoal } from '../hooks/useWeeklyGoals'
 import { Flame, Snowflake, AlertTriangle, AlertOctagon, TrendingUp, TrendingDown, Plus, Target, Trophy, X } from 'lucide-react'
+import { StreakVisualizer } from './visualizations'
 
 interface HomeDashboardProps {
   stats: {
@@ -245,16 +246,8 @@ export function HomeDashboard({
           </div>
         </div>
 
-        {/* Streak */}
-        <div className="phone-card p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Streak</p>
-            <p className={`text-lg font-semibold ${today.streak > 0 ? 'status-profit' : today.streak < 0 ? 'status-loss' : ''}`}>
-              {today.streak !== 0 && <span className="mr-1">{streakIcon}</span>}{Math.abs(today.streak)}{today.streak > 0 ? 'W' : today.streak < 0 ? 'L' : ''}
-            </p>
-          </div>
-          {streakIcon || <span>—</span>}
-        </div>
+        {/* Streak Visualizer */}
+        <StreakVisualizer streak={today.streak} streakType={today.streakType} />
 
         {/* Recent Trades */}
         {todayTrades.length > 0 && (

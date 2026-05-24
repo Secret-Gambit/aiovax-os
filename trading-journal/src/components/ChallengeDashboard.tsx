@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Challenge, ChallengeDay, AdaptiveAdjustment } from '../types/challenge'
 import { Target, Calendar, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, DollarSign, ChevronRight, RotateCcw, Trash2 } from 'lucide-react'
+import { ChallengeProgressWheel } from './visualizations'
 
 interface ChallengeDashboardProps {
   challenge: Challenge
@@ -110,29 +111,8 @@ export function ChallengeDashboard({
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-        {/* Progress Card */}
-        <div className="phone-card rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Progress</span>
-            <span className="text-2xl font-bold gold-text">{progressStats.progressPercent.toFixed(1)}%</span>
-          </div>
-          
-          {/* Progress bar */}
-          <div className="h-3 rounded-full overflow-hidden mb-3" style={{ background: 'var(--bg-tertiary)' }}>
-            <div 
-              className="h-full rounded-full transition-all duration-500"
-              style={{ 
-                width: `${progressStats.progressPercent}%`,
-                background: progressStats.isOnTrack ? 'var(--profit)' : 'var(--warning)'
-              }}
-            />
-          </div>
-          
-          <div className="flex justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
-            <span>{formatCurrency(challenge.startBalance)}</span>
-            <span>{formatCurrency(challenge.targetBalance)}</span>
-          </div>
-        </div>
+        {/* Challenge Progress Wheel */}
+        <ChallengeProgressWheel challenge={challenge} />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
