@@ -1,47 +1,58 @@
-# XAUUSD Trading Journal
+# AIOVAX Trading Journal
 
-A Progressive Web App (PWA) for tracking XAUUSD (Gold) trades with risk management, weekly goals, and challenge engine features.
+A professional trading journal for XAUUSD (Gold) traders with TradeZella-style dashboard analytics, risk management, and challenge engine.
 
-![Trading Journal](https://img.shields.io/badge/XAUUSD-Trading%20Journal-gold)
+![Trading Journal](https://img.shields.io/badge/AIOVAX-Trading%20Journal-gold)
 ![PWA](https://img.shields.io/badge/PWA-Offline%20Ready-blue)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss)
 
 ## Features
 
-### Core Trading Features
-- **Quick Trade Logging** - Log trades fast with entry, exit, lot size, and outcome
-- **Trade History** - View, edit, and delete past trades with filtering
-- **Image Upload** - Attach charts/screenshots to trades
-- **Trade Notes** - Add detailed notes for each trade
+### 📊 Dashboard Analytics
+- **TradeZella-Style Dashboard** - Professional desktop layout with sidebar navigation
+- **Performance Metrics** - Win rate, Net R, Profit Factor, Expectancy, Discipline Score
+- **Visual Analytics** - R-Multiple histogram, 30-day heatmap, setup performance bars
+- **Setup Trends** - Sparkline charts showing win rate trends over last 20 trades
+- **Streak Tracking** - Visual streak counter with win/loss indicators
 
-### Risk Management
-- **Weekly R:R Goals** - Set weekly risk-to-reward targets (e.g., 1:10)
-- **R Tracking** - Automatically calculate accumulated R for the week
-- **Discipline Alerts** - Get warnings when approaching or exceeding weekly limits
-- **Progress Visualization** - See weekly progress with color-coded indicators
+### 📝 Trade Logging
+- **Quick Trade Entry** - Direction, setup type, entry trigger, emotion tracking
+- **R-Multiple Calculator** - Automatic R calculation from entry/exit
+- **Emotion Intensity Slider** - Track from Calm to Revenge Trading
+- **Trade Templates** - Save and reuse common trade setups
+- **Voice-to-Text Notes** - Speak your trade notes
+- **Chart Screenshots** - Attach trade images
 
-### Challenge Engine
-- **Custom Challenges** - Create challenges with starting balance, target, and timeframe
-- **Daily Targets** - Automatically calculates daily profit targets
-- **Lot Size Calculator** - Recommends lot sizes based on risk parameters
-- **Adaptive Recalculation** - Adjusts plan when targets are missed
-- **Progress Tracking** - Visual progress bar and day-by-day tracking
+### 🎯 Risk Management
+- **Weekly R:R Goals** - Set and track weekly targets
+- **Discipline Scoring** - Percentage of calm vs emotional trades
+- **Progress Visualization** - Real-time goal tracking
+- **Discipline Alerts** - Warnings for overtrading patterns
 
-### PWA Features
-- **Offline Access** - Use the app without internet connection
-- **Install on Home Screen** - Works like a native mobile app
-- **Data Persistence** - All data stored locally in browser
-- **Mobile Optimized** - Designed for phone screens
+### 🏆 Challenge Engine
+- **Custom Challenges** - Starting balance, target, timeframe
+- **Daily Targets** - Automatic daily profit calculations
+- **Lot Size Calculator** - XAUUSD-optimized recommendations
+- **Adaptive Recalculation** - Adjusts when targets are missed
+- **Progress Tracking** - Visual progress wheels
+
+### 📱 Multi-Platform
+- **Desktop Dashboard** - Full analytics view (≥1024px)
+- **Mobile Optimized** - Phone-friendly interface (<1024px)
+- **PWA Offline Support** - Works without internet
+- **Install on Home Screen** - Native app experience
 
 ## Tech Stack
 
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **Tailwind CSS** - Styling
-- **Lucide Icons** - Icon library
-- **localStorage** - Data persistence
+- **React 18** - UI framework with hooks
+- **TypeScript** - Full type safety
+- **Vite** - Fast build tool
+- **Tailwind CSS** - Utility-first styling
+- **Lucide React** - Modern icon library
+- **localStorage** - Browser data persistence
+- **Custom Visualization Components** - Charts and gauges built with React + SVG
 
 ## Installation
 
@@ -74,45 +85,40 @@ npm run build
 
 ## Usage
 
-### Logging a Trade
-1. Tap the **+** button on the home screen
-2. Enter trade details:
-   - Entry price, Exit price
-   - Lot size (e.g., 0.01, 0.1, 1.0)
-   - Date and time
-   - Optional: Add screenshot, notes
-3. Save the trade
+### Desktop Dashboard (≥1024px)
+1. **Dashboard** - Overview with key stats and recent trades
+2. **Analytics** - Detailed performance charts and metrics
+3. **Log Trade** - Quick trade entry form
+4. **History** - Full trade history with filters
+5. **Challenge** - Challenge tracking and daily logging
+6. **Settings** - Data export/import and app info
 
-### Setting Weekly Goals
-1. Go to **Goals** tab
-2. Set your weekly R:R target (e.g., 10R for the week)
-3. Track progress in real-time as you log trades
+### Mobile App (<1024px)
+1. Tap **+** to log a new trade
+2. Use bottom tabs to navigate (Home, Log, List, Stats, Challenge)
+3. Swipe through screens optimized for phone screens
 
-### Using the Challenge Engine
-1. Go to **Challenge** tab
-2. Tap "Start New Challenge"
-3. Enter your parameters:
+### Key Metrics Explained
+- **Win Rate** - Percentage of winning trades
+- **Net R** - Total R-multiples accumulated
+- **Profit Factor** - Gross Profit ÷ Gross Loss (goal: >1.5)
+- **Expectancy** - Expected R per trade = (Win% × Avg Win) - (Loss% × Avg Loss)
+- **Discipline Score** - Percentage of trades logged as "Calm"
+
+### Challenge Engine
+1. Go to **Challenge** section
+2. Enter parameters:
    - Starting balance (e.g., $100)
    - Target balance (e.g., $100,000)
-   - Risk:Reward ratio (e.g., 1:4)
+   - R:R ratio (e.g., 1:4)
    - Max days (e.g., 30)
-   - Average stop loss in pips (e.g., 60)
-4. Follow the daily plan with recommended lot sizes
-5. Log your daily results
-6. The engine adapts if you miss targets
+   - Avg stop loss pips (e.g., 60)
+3. Follow daily targets with calculated lot sizes
+4. Log daily results - engine adapts if targets missed
 
-### Understanding Lot Size Calculation
-
-The app calculates lot sizes based on:
-- **XAUUSD pip value:** $10 per pip for 1.0 standard lot
-- **Risk per trade:** Target profit ÷ R:R ratio
-- **Stop loss pips:** Your average SL distance
-- **Safety cap:** Max 5% account risk per trade
-- **Rounding:** Rounds UP to nearest 0.01 (micro lot)
-
-**Formula:**
+**Lot Size Formula:**
 ```
-Lot Size = Risk Amount ÷ (Stop Loss Pips × $10)
+Lot Size = Risk Amount ÷ (Stop Loss Pips × $10 per pip)
 ```
 
 ## File Structure
@@ -120,38 +126,59 @@ Lot Size = Risk Amount ÷ (Stop Loss Pips × $10)
 ```
 trading-journal/
 ├── public/
-│   ├── manifest.json      # PWA manifest
-│   ├── sw.js             # Service worker (offline support)
-│   └── gold-icon.svg     # App icon
+│   ├── manifest.json          # PWA manifest
+│   ├── sw.js                 # Service worker
+│   ├── _redirects            # Netlify SPA redirect
+│   └── gold-icon.svg         # App icon
 ├── src/
-│   ├── components/       # React components
-│   │   ├── HomeDashboard.tsx
-│   │   ├── QuickLogger.tsx
-│   │   ├── History.tsx
-│   │   ├── WeeklyGoals.tsx
-│   │   ├── ChallengeSetup.tsx
-│   │   └── ChallengeDashboard.tsx
-│   ├── hooks/           # Custom React hooks
+│   ├── components/
+│   │   ├── DesktopLayout.tsx     # Desktop dashboard layout
+│   │   ├── HomeDashboard.tsx     # Mobile home screen
+│   │   ├── QuickLogger.tsx       # Trade entry form
+│   │   ├── History.tsx           # Trade history list
+│   │   ├── ChallengeSetup.tsx    # Challenge creation
+│   │   ├── ChallengeDashboard.tsx # Challenge tracking
+│   │   ├── Insights.tsx          # Mobile analytics
+│   │   └── visualizations/       # Chart components
+│   │       ├── RMHistogram.tsx
+│   │       ├── SetupPerformanceBars.tsx
+│   │       ├── DailyHeatStrip.tsx
+│   │       ├── WinRateGauge.tsx
+│   │       ├── DisciplineScoreRing.tsx
+│   │       ├── SetupTrendSparkline.tsx
+│   │       ├── StreakVisualizer.tsx
+│   │       └── ChallengeProgressWheel.tsx
+│   ├── hooks/
 │   │   ├── useTrades.ts
+│   │   ├── useTemplates.ts
 │   │   ├── useWeeklyGoals.ts
 │   │   └── useChallenge.ts
-│   ├── types/           # TypeScript types
+│   ├── types/
 │   │   ├── trade.ts
-│   │   ├── weeklyGoal.ts
 │   │   └── challenge.ts
-│   ├── App.tsx          # Main app component
-│   └── main.tsx         # Entry point
-└── README.md
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+├── index.html
+├── vite.config.ts
+├── tailwind.config.js
+├── netlify.toml
+└── package.json
 ```
 
-## Data Storage
+## Data Storage & Backup
 
-All data is stored in **localStorage** in your browser:
-- `trades` - Your trade history
-- `weekly-goals` - Weekly R:R goals and progress
-- `current-challenge` - Active challenge data
+All data stored locally in browser:
+- `trades` - Trade history
+- `weekly-goals` - Weekly targets
+- `current-challenge` - Challenge progress
+- `tradeTemplates` - Saved templates
 
-**Note:** Clear browser data will erase your trades. Export/backup feature coming soon!
+### Backup & Restore
+1. Go to **Settings → Data**
+2. Click **Export Backup** to download JSON file
+3. Use **Import Backup** to restore from file
+4. **Clear All Data** to reset everything (with confirmation)
 
 ## Browser Support
 
@@ -162,15 +189,20 @@ All data is stored in **localStorage** in your browser:
 
 ## Roadmap
 
-- [x] Trade logging with images
-- [x] Weekly R:R goals
+- [x] Trade logging with images & voice notes
+- [x] Weekly R:R goals with progress tracking
 - [x] Challenge engine with lot size calculator
 - [x] PWA offline support
-- [ ] Data export/import (JSON/CSV)
-- [ ] Trade statistics and analytics
+- [x] Data export/import (JSON)
+- [x] Trade statistics and analytics dashboard
+- [x] Desktop TradeZella-style layout
+- [x] Visualization components (histograms, heatmaps, gauges)
+- [x] Profit Factor & Expectancy calculations
+- [x] Settings page with data management
 - [ ] Multiple challenge presets
-- [ ] Dark/light theme toggle
 - [ ] Push notifications for daily targets
+- [ ] Trade journal PDF export
+- [ ] Performance reports by month/quarter
 
 ## Contributing
 
@@ -190,4 +222,4 @@ Built by **Secret Gambit** for the trading community.
 
 ---
 
-**Happy Trading!** 📈💰
+**Trade Smart. Track Everything.** 📈💰
