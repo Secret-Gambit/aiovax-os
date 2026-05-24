@@ -21,7 +21,7 @@ import { History as HistoryComponent } from './History'
 import { ChallengeDashboard } from './ChallengeDashboard'
 import { ChallengeSetup } from './ChallengeSetup'
 
-type DesktopScreen = 'dashboard' | 'logger' | 'history' | 'analytics' | 'challenge'
+type DesktopScreen = 'dashboard' | 'logger' | 'history' | 'analytics' | 'challenge' | 'settings'
 
 interface DesktopLayoutProps {
   stats: {
@@ -203,6 +203,8 @@ export function DesktopLayout({
             onCancel={() => setCurrentScreen('dashboard')}
           />
         )
+      case 'settings':
+        return <SettingsView />
       default:
         return null
     }
@@ -241,10 +243,13 @@ export function DesktopLayout({
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-item">
+          <button
+            onClick={() => setCurrentScreen('settings')}
+            className={`sidebar-item w-full text-left ${currentScreen === 'settings' ? 'active' : ''}`}
+          >
             <Settings className="w-5 h-5" />
             <span>Settings</span>
-          </div>
+          </button>
         </div>
       </aside>
 
@@ -797,6 +802,185 @@ function AnalyticsView({
           <SetupTrends trades={allTimeTrades} />
         </div>
       </section>
+    </div>
+  )
+}
+
+// Settings View Component
+function SettingsView() {
+  const [activeSection, setActiveSection] = useState<'general' | 'data' | 'about'>('general')
+  
+  const handleExportData = () => {
+    const data = {
+      trades: JSON.parse(localStorage.getItem('trades') || '[]'),
+      challenge: JSON.parse(localStorage.getItem('challenge') || 'null'),
+      weeklyGoal: JSON.parse(localStorage.getItem('weeklyGoal') || 'null'),
+      templates: JSON.parse(localStorage.getItem('tradeTemplates') || '[]'),
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `trading-journal-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  
+  const handleClearData = () => {
+    if (confirm('Are you sure? This will delete ALL your trades, challenge progress, and settings. This cannot be undone.')) {
+      localStorage.removeItem('trades')
+      localStorage.removeItem('challenge')
+      localStorage.removeItem('weeklyGoal')
+      localStorage.removeItem('tradeTemplates')
+      window.location.reload()
+    }
+  }
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+        Settings
+      </h2>
+      
+      {/* Settings Navigation */}
+      <div className="flex gap-2">
+        {[
+          { id: 'general', label: 'General' },
+          { id: 'data', label: 'Data' },
+          { id: 'about', label: 'About' },
+        ].map(section => (
+          <button
+            key={section.id}
+            onClick={() => setActiveSection(section.id as typeof activeSection)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeSection === section.id
+                ? 'bg-[var(--gold-primary)] text-black'
+                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+            }`}
+          >
+            {section.label}
+          </button>
+        ))}
+      </div>
+
+      {/* General Settings */}
+      {activeSection === 'general' && (
+        <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)] space-y-6">
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Theme</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              AIOVAX Trading Journal uses a dark theme optimized for trading environments.
+            </p>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg-tertiary)]">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--gold-primary)] to-[var(--gold-secondary)]" />
+              <div>
+                <p className="font-medium">Dark Theme</p>
+                <p className="text-sm text-[var(--text-muted)]">Currently active</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-[var(--border-soft)] pt-6">
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Notifications</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Browser notifications for discipline alerts and weekly goal reminders.
+            </p>
+            <label className="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg-tertiary)] cursor-pointer">
+              <input type="checkbox" defaultChecked className="w-5 h-5 rounded accent-[var(--gold-primary)]" />
+              <span>Enable notifications</span>
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Data Management */}
+      {activeSection === 'data' && (
+        <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)] space-y-6">
+          <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Export Data</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Download all your trades, challenge progress, and settings as a JSON file.
+            </p>
+            <button
+              onClick={handleExportData}
+              className="px-4 py-2 bg-[var(--gold-primary)] text-black rounded-lg font-medium hover:opacity-90 transition-opacity"
+            >
+              Export Backup
+            </button>
+          </div>
+          
+          <div className="border-t border-[var(--border-soft)] pt-6">
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Import Data</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Restore your data from a backup file.
+            </p>
+            <label className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg font-medium cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors inline-block">
+              <input type="file" accept=".json" className="hidden" />
+              Import Backup
+            </label>
+          </div>
+          
+          <div className="border-t border-[var(--border-soft)] pt-6">
+            <h3 className="font-semibold text-[var(--loss)] mb-2">Danger Zone</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Permanently delete all your data. This action cannot be undone.
+            </p>
+            <button
+              onClick={handleClearData}
+              className="px-4 py-2 bg-[var(--loss)] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+            >
+              Clear All Data
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* About */}
+      {activeSection === 'about' && (
+        <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)] space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[var(--gold-primary)] to-[var(--gold-secondary)] flex items-center justify-center">
+              <span className="text-2xl font-bold text-black">A</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-[var(--text-primary)]">AIOVAX Trading Journal</h3>
+              <p className="text-sm text-[var(--text-muted)]">Version 1.0.0</p>
+            </div>
+          </div>
+          
+          <p className="text-[var(--text-secondary)]">
+            A professional trading journal for XAUUSD (Gold) traders. Track your trades, 
+            analyze your performance, and improve your discipline with detailed analytics 
+            and visualizations.
+          </p>
+          
+          <div className="border-t border-[var(--border-soft)] pt-4">
+            <h4 className="font-medium text-[var(--text-primary)] mb-3">Features</h4>
+            <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--gold-primary)]" />
+                Trade logging with templates
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--gold-primary)]" />
+                R-multiple tracking
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--gold-primary)]" />
+                Weekly goals & challenges
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--gold-primary)]" />
+                Performance analytics
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--gold-primary)]" />
+                Discipline scoring
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
