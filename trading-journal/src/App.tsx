@@ -8,6 +8,7 @@ import { History } from './components/History'
 import { ChallengeSetup } from './components/ChallengeSetup'
 import { ChallengeDashboard } from './components/ChallengeDashboard'
 import { DesktopLayout } from './components/DesktopLayout'
+import { Onboarding } from './components/Onboarding'
 import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
@@ -52,8 +53,19 @@ function App() {
     isMajorDrawdown,
   } = useChallenge()
 
-  // Initialize theme from localStorage
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [traderName, setTraderName] = useState('')
+
+  // Initialize theme and check onboarding
   useEffect(() => {
+    // Check if user has seen onboarding
+    const hasSeenOnboarding = localStorage.getItem('trading-journal-onboarding')
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true)
+    }
+
+    // Apply saved theme
     const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
     if (savedTheme && themeColors[savedTheme]) {
       const colors = themeColors[savedTheme]
@@ -63,7 +75,48 @@ function App() {
       root.style.setProperty('--gold-glow', colors.glow)
       root.style.setProperty('--gold-soft', colors.soft)
     }
+
+    // Load trader name
+    const savedName = localStorage.getItem('trading-journal-trader-name')
+    if (savedName) {
+      setTraderName(savedName)
+    }
   }, [])
+
+  const handleOnboardingComplete = (data: {
+    traderName: string
+    preferredSetup: string
+    weeklyGoal: number
+    theme: ThemeColor
+    hasSeenOnboarding: boolean
+  }) => {
+    // Save all preferences
+    localStorage.setItem('trading-journal-onboarding', 'true')
+    localStorage.setItem('trading-journal-trader-name', data.traderName)
+    localStorage.setItem('trading-journal-preferred-setup', data.preferredSetup)
+    localStorage.setItem('trading-journal-theme', data.theme)
+    
+    // Apply theme
+    const colors = themeColors[data.theme]
+    const root = document.documentElement
+    root.style.setProperty('--gold-primary', colors.primary)
+    root.style.setProperty('--gold-secondary', colors.secondary)
+    root.style.setProperty('--gold-glow', colors.glow)
+    root.style.setProperty('--gold-soft', colors.soft)
+    
+    // Set weekly goal if provided
+    if (data.weeklyGoal) {
+      setWeeklyGoal(data.weeklyGoal)
+    }
+    
+    setTraderName(data.traderName)
+    setShowOnboarding(false)
+  }
+
+  const handleSkipOnboarding = () => {
+    localStorage.setItem('trading-journal-onboarding', 'true')
+    setShowOnboarding(false)
+  }
 
   if (!isLoaded) {
     return (
@@ -192,6 +245,14 @@ function App() {
 
   return (
     <>
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <Onboarding 
+          onComplete={handleOnboardingComplete}
+          onSkip={handleSkipOnboarding}
+        />
+      )}
+
       {/* Desktop Layout - shown on screens >= 1024px */}
       <DesktopLayout
         stats={stats}
