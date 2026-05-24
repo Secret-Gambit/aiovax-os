@@ -1,4 +1,5 @@
 import type { Trade, SetupType } from '../../types/trade'
+import { SETUP_OPTIONS } from '../../types/trade'
 
 interface SetupTrendSparklineProps {
   trades: Trade[]
@@ -95,8 +96,6 @@ export function SetupTrendSparkline({ trades, setup, windowSize = 20 }: SetupTre
 interface SetupTrendsProps {
   trades: Trade[]
 }
-
-import { SETUP_OPTIONS } from '../../types/trade'
 
 export function SetupTrends({ trades }: SetupTrendsProps) {
   const activeSetups = SETUP_OPTIONS.filter(setup => 
