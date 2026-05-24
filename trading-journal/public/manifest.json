@@ -1,7 +1,7 @@
 {
-  "short_name": "XAUUSD Journal",
-  "name": "XAUUSD Trading Journal",
-  "description": "Track your XAUUSD (Gold) trades with risk management and weekly goals",
+  "short_name": "AIOVAX",
+  "name": "AIOVAX Trading Journal",
+  "description": "Professional trading journal for XAUUSD (Gold) with analytics, R-multiple tracking, and prop firm challenge simulation",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
