@@ -11,6 +11,7 @@ import { ChallengeDashboard } from './components/ChallengeDashboard'
 import { DesktopLayout } from './components/DesktopLayout'
 import { Onboarding } from './components/Onboarding'
 import { MobileSettings } from './components/MobileSettings'
+import { InstallPrompt } from './components/InstallPrompt'
 import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
@@ -272,6 +273,9 @@ function App() {
           onSkip={handleSkipOnboarding}
         />
       )}
+
+      {/* Install Prompt */}
+      <InstallPrompt />
 
       {/* Desktop Layout - shown on screens >= 1024px */}
       <DesktopLayout

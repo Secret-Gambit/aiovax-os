@@ -111,24 +111,36 @@ export function DesktopLayout({
   const [duplicateTrade, setDuplicateTrade] = useState<Trade | null>(null)
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
 
-  // Load current theme on mount
+  // Load current theme and listen for changes
   useEffect(() => {
-    const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
-    if (savedTheme && themeColors[savedTheme]) {
-      setCurrentTheme(savedTheme)
-    }
-  }, [])
-
-  // Listen for theme changes
-  useEffect(() => {
-    const handleStorageChange = () => {
+    const loadTheme = () => {
       const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
       if (savedTheme && themeColors[savedTheme]) {
         setCurrentTheme(savedTheme)
       }
     }
+    
+    // Load initial theme
+    loadTheme()
+    
+    // Listen for storage changes (from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'trading-journal-theme') {
+        loadTheme()
+      }
+    }
     window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    
+    // Listen for custom theme change events (same tab)
+    const handleThemeChange = () => {
+      loadTheme()
+    }
+    window.addEventListener('theme-changed', handleThemeChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('theme-changed', handleThemeChange)
+    }
   }, [])
 
   const navItems = [
@@ -856,6 +868,8 @@ function SettingsView() {
     root.style.setProperty('--gold-glow', colors.glow)
     root.style.setProperty('--gold-soft', colors.soft)
     localStorage.setItem('trading-journal-theme', theme)
+    // Dispatch custom event for same-tab communication
+    window.dispatchEvent(new Event('theme-changed'))
   }
   
   const handleExportData = () => {

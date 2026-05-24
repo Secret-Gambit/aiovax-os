@@ -41,6 +41,8 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
     root.style.setProperty('--gold-glow', colors.glow)
     root.style.setProperty('--gold-soft', colors.soft)
     localStorage.setItem('trading-journal-theme', theme)
+    // Dispatch event for same-tab communication
+    window.dispatchEvent(new Event('theme-changed'))
   }
 
   const handleExportData = () => {
