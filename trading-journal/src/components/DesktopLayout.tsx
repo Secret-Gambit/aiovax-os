@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Trade, TradeTemplate } from '../types/trade'
 import type { Challenge, ChallengeDay, ChallengeSetupInput, AdaptiveAdjustment } from '../types/challenge'
 import type { DisciplineAlert } from '../hooks/useTrades'
 import type { WeeklyGoal } from '../hooks/useWeeklyGoals'
+import type { ThemeColor } from '../hooks/useTheme'
+import { themeColors } from '../hooks/useTheme'
 import { 
   LayoutDashboard, 
   PlusCircle, 
@@ -809,6 +811,26 @@ function AnalyticsView({
 // Settings View Component
 function SettingsView() {
   const [activeSection, setActiveSection] = useState<'general' | 'data' | 'about'>('general')
+  const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
+
+  // Load theme on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('trading-journal-theme') as ThemeColor
+    if (saved && themeColors[saved]) {
+      setCurrentTheme(saved)
+    }
+  }, [])
+
+  const handleThemeChange = (theme: ThemeColor) => {
+    setCurrentTheme(theme)
+    const colors = themeColors[theme]
+    const root = document.documentElement
+    root.style.setProperty('--gold-primary', colors.primary)
+    root.style.setProperty('--gold-secondary', colors.secondary)
+    root.style.setProperty('--gold-glow', colors.glow)
+    root.style.setProperty('--gold-soft', colors.soft)
+    localStorage.setItem('trading-journal-theme', theme)
+  }
   
   const handleExportData = () => {
     const data = {
@@ -867,16 +889,30 @@ function SettingsView() {
       {activeSection === 'general' && (
         <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)] space-y-6">
           <div>
-            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Theme</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Accent Color</h3>
             <p className="text-sm text-[var(--text-muted)] mb-4">
-              AIOVAX Trading Journal uses a dark theme optimized for trading environments.
+              Choose your preferred accent color theme.
             </p>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg-tertiary)]">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--gold-primary)] to-[var(--gold-secondary)]" />
-              <div>
-                <p className="font-medium">Dark Theme</p>
-                <p className="text-sm text-[var(--text-muted)]">Currently active</p>
-              </div>
+            <div className="grid grid-cols-5 gap-3">
+              {(Object.keys(themeColors) as ThemeColor[]).map((theme) => (
+                <button
+                  key={theme}
+                  onClick={() => handleThemeChange(theme)}
+                  className={`p-3 rounded-xl border-2 transition-all ${
+                    currentTheme === theme 
+                      ? 'border-[var(--gold-primary)] bg-[var(--gold-soft)]' 
+                      : 'border-transparent bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)]'
+                  }`}
+                >
+                  <div 
+                    className="w-8 h-8 rounded-lg mx-auto mb-2"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${themeColors[theme].primary}, ${themeColors[theme].secondary})` 
+                    }}
+                  />
+                  <span className="text-xs capitalize text-[var(--text-secondary)]">{theme}</span>
+                </button>
+              ))}
             </div>
           </div>
           

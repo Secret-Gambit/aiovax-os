@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Trade } from './types/trade'
 import type { ChallengeSetupInput } from './types/challenge'
 import { HomeDashboard } from './components/HomeDashboard'
@@ -12,6 +12,7 @@ import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
 import { useChallenge } from './hooks/useChallenge'
+import { themeColors, type ThemeColor } from './hooks/useTheme'
 
 type Screen = 'home' | 'logger' | 'insights' | 'history' | 'challenge' | 'challenge-setup'
 
@@ -50,6 +51,19 @@ function App() {
     getCurrentLotSize,
     isMajorDrawdown,
   } = useChallenge()
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
+    if (savedTheme && themeColors[savedTheme]) {
+      const colors = themeColors[savedTheme]
+      const root = document.documentElement
+      root.style.setProperty('--gold-primary', colors.primary)
+      root.style.setProperty('--gold-secondary', colors.secondary)
+      root.style.setProperty('--gold-glow', colors.glow)
+      root.style.setProperty('--gold-soft', colors.soft)
+    }
+  }, [])
 
   if (!isLoaded) {
     return (
