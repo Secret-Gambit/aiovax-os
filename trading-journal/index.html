@@ -14,56 +14,414 @@
       content="black-translucent"
     />
     <link rel="manifest" href="/manifest.json" />
-    <title>XAUUSD Trading Journal</title>
+    <title>AIOVAX Trading Journal</title>
     <style>
       /* Critical CSS - loads immediately */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
       html,
       body {
         margin: 0;
         padding: 0;
         background: #0a0a0a;
         height: 100%;
+        overflow: hidden;
       }
+
+      /* Loading Screen */
       .app-loading {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 100vh;
-        background: #0a0a0a;
+        background:
+          radial-gradient(ellipse at top, #1a1a1a 0%, transparent 50%),
+          radial-gradient(ellipse at bottom, #0d0d0d 0%, transparent 50%),
+          #0a0a0a;
         color: #ffd700;
         font-family:
+          "Segoe UI",
           system-ui,
           -apple-system,
           sans-serif;
+        position: relative;
       }
-      .app-loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 3px solid #333;
-        border-top-color: #ffd700;
+
+      /* Grid Background Effect */
+      .app-loading::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image:
+          linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: gridMove 20s linear infinite;
+        pointer-events: none;
+      }
+
+      @keyframes gridMove {
+        0% {
+          transform: perspective(500px) rotateX(60deg) translateY(0);
+        }
+        100% {
+          transform: perspective(500px) rotateX(60deg) translateY(50px);
+        }
+      }
+
+      /* Logo Container */
+      .loading-logo {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin-bottom: 30px;
+      }
+
+      /* Animated Logo */
+      .loading-logo-inner {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 56px;
+        font-weight: bold;
+        color: #000;
+        box-shadow:
+          0 0 60px rgba(255, 215, 0, 0.3),
+          0 0 100px rgba(255, 215, 0, 0.1);
+        animation:
+          logoPulse 2s ease-in-out infinite,
+          logoRotate 3s ease-in-out infinite;
+      }
+
+      @keyframes logoPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow:
+            0 0 60px rgba(255, 215, 0, 0.3),
+            0 0 100px rgba(255, 215, 0, 0.1);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow:
+            0 0 80px rgba(255, 215, 0, 0.5),
+            0 0 120px rgba(255, 215, 0, 0.2);
+        }
+      }
+
+      @keyframes logoRotate {
+        0%,
+        100% {
+          transform: rotateY(0deg);
+        }
+        50% {
+          transform: rotateY(10deg);
+        }
+      }
+
+      /* Orbiting Particles */
+      .orbit-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 140px;
+        height: 140px;
+        margin: -70px 0 0 -70px;
+        border: 1px solid rgba(255, 215, 0, 0.2);
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: orbitRotate 4s linear infinite;
       }
-      @keyframes spin {
+
+      .orbit-particle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #ffd700;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #ffd700;
+      }
+
+      .orbit-particle:nth-child(1) {
+        top: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .orbit-particle:nth-child(2) {
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .orbit-particle:nth-child(3) {
+        left: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      @keyframes orbitRotate {
+        from {
+          transform: rotate(0deg);
+        }
         to {
           transform: rotate(360deg);
         }
       }
-      .app-loading-text {
+
+      /* Brand Name */
+      .loading-brand {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 4px;
+        background: linear-gradient(
+          135deg,
+          #ffd700 0%,
+          #ffaa00 50%,
+          #ffd700 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+
+      .loading-subtitle {
+        font-size: 12px;
+        color: #666;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+      }
+
+      /* Status Message */
+      .loading-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        color: #888;
+        font-family: "Courier New", monospace;
+        min-height: 20px;
+      }
+
+      .loading-status-dot {
+        width: 8px;
+        height: 8px;
+        background: #ffd700;
+        border-radius: 50%;
+        animation: statusBlink 1s ease-in-out infinite;
+      }
+
+      @keyframes statusBlink {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(0.8);
+        }
+      }
+
+      /* Progress Bar Container */
+      .loading-progress-container {
+        width: 280px;
+        height: 4px;
+        background: rgba(255, 215, 0, 0.1);
+        border-radius: 2px;
         margin-top: 20px;
-        font-size: 16px;
-        letter-spacing: 1px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Progress Bar */
+      .loading-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #ffd700 0%, #ffaa00 100%);
+        border-radius: 2px;
+        width: 0%;
+        animation: progressLoad 3s ease-out forwards;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      }
+
+      /* Shimmer Effect on Progress */
+      .loading-progress-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 1.5s infinite;
+      }
+
+      @keyframes progressLoad {
+        0% {
+          width: 0%;
+        }
+        20% {
+          width: 20%;
+        }
+        50% {
+          width: 60%;
+        }
+        80% {
+          width: 85%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      /* Percentage Counter */
+      .loading-percentage {
+        font-size: 12px;
+        color: #666;
+        margin-top: 12px;
+        font-family: "Courier New", monospace;
+      }
+
+      /* Tech Decorations */
+      .loading-tech-decoration {
+        position: absolute;
+        font-size: 10px;
+        color: rgba(255, 215, 0, 0.15);
+        font-family: "Courier New", monospace;
+        letter-spacing: 2px;
+      }
+
+      .loading-tech-decoration.top-left {
+        top: 30px;
+        left: 30px;
+      }
+
+      .loading-tech-decoration.top-right {
+        top: 30px;
+        right: 30px;
+      }
+
+      .loading-tech-decoration.bottom-left {
+        bottom: 30px;
+        left: 30px;
+      }
+
+      .loading-tech-decoration.bottom-right {
+        bottom: 30px;
+        right: 30px;
       }
     </style>
   </head>
   <body>
     <div id="root">
       <div class="app-loading">
-        <div class="app-loading-spinner"></div>
-        <div class="app-loading-text">Loading...</div>
+        <!-- Tech Decorations -->
+        <div class="loading-tech-decoration top-left">◄ SYSTEM_READY ►</div>
+        <div class="loading-tech-decoration top-right">v1.0.0</div>
+        <div class="loading-tech-decoration bottom-left">XAU/USD</div>
+        <div class="loading-tech-decoration bottom-right">PRO_TRADER</div>
+
+        <!-- Logo with Orbit -->
+        <div class="loading-logo">
+          <div class="orbit-ring">
+            <div class="orbit-particle"></div>
+            <div class="orbit-particle"></div>
+            <div class="orbit-particle"></div>
+          </div>
+          <div class="loading-logo-inner">A</div>
+        </div>
+
+        <!-- Brand -->
+        <div class="loading-brand">AIOVAX</div>
+        <div class="loading-subtitle">Trading Journal</div>
+
+        <!-- Status Message -->
+        <div class="loading-status">
+          <div class="loading-status-dot"></div>
+          <span id="loading-message">Initializing trading engine...</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="loading-progress-container">
+          <div class="loading-progress-bar"></div>
+        </div>
+
+        <!-- Percentage -->
+        <div class="loading-percentage" id="loading-percent">0%</div>
       </div>
     </div>
+
+    <script>
+      // Loading Messages
+      const messages = [
+        "Initializing trading engine...",
+        "Loading market data feeds...",
+        "Calibrating analytics modules...",
+        "Syncing chart libraries...",
+        "Optimizing R-multiple calculations...",
+        "Preparing discipline tracker...",
+        "Loading trade templates...",
+        "Connecting to gold markets...",
+        "Finalizing setup...",
+      ];
+
+      let messageIndex = 0;
+      const messageEl = document.getElementById("loading-message");
+      const percentEl = document.getElementById("loading-percent");
+
+      // Cycle through messages
+      const messageInterval = setInterval(() => {
+        messageIndex++;
+        if (messageIndex < messages.length) {
+          messageEl.style.opacity = "0";
+          setTimeout(() => {
+            messageEl.textContent = messages[messageIndex];
+            messageEl.style.opacity = "1";
+          }, 200);
+        }
+      }, 350);
+
+      // Update percentage
+      let percent = 0;
+      const percentInterval = setInterval(() => {
+        percent++;
+        if (percent <= 100) {
+          percentEl.textContent = percent + "%";
+        }
+      }, 30);
+
+      // Cleanup after 3 seconds
+      setTimeout(() => {
+        clearInterval(messageInterval);
+        clearInterval(percentInterval);
+      }, 3000);
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
