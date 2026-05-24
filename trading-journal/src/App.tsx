@@ -9,13 +9,14 @@ import { ChallengeSetup } from './components/ChallengeSetup'
 import { ChallengeDashboard } from './components/ChallengeDashboard'
 import { DesktopLayout } from './components/DesktopLayout'
 import { Onboarding } from './components/Onboarding'
+import { MobileSettings } from './components/MobileSettings'
 import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
 import { useChallenge } from './hooks/useChallenge'
 import { themeColors, type ThemeColor } from './hooks/useTheme'
 
-type Screen = 'home' | 'logger' | 'insights' | 'history' | 'challenge' | 'challenge-setup'
+type Screen = 'home' | 'logger' | 'insights' | 'history' | 'challenge' | 'challenge-setup' | 'settings'
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home')
@@ -238,6 +239,24 @@ function App() {
             onCancel={() => setCurrentScreen('home')}
           />
         )
+      case 'settings':
+        return (
+          <MobileSettings 
+            onResetAllData={() => {
+              // Reset all localStorage data
+              localStorage.removeItem('trading-journal-trades')
+              localStorage.removeItem('trading-journal-weekly-goals')
+              localStorage.removeItem('trading-journal-challenge')
+              localStorage.removeItem('trading-journal-templates')
+              localStorage.removeItem('trading-journal-trader-name')
+              localStorage.removeItem('trading-journal-preferred-setup')
+              localStorage.removeItem('trading-journal-theme')
+              localStorage.removeItem('trading-journal-onboarding')
+              // Reload to reset all state
+              window.location.reload()
+            }}
+          />
+        )
       default:
         return null
     }
@@ -306,18 +325,18 @@ function App() {
               { id: 'logger', icon: '+', label: 'Trade' },
               { id: 'history', icon: 'L', label: 'History' },
               { id: 'insights', icon: 'S', label: 'Stats' },
-              { id: 'challenge', icon: 'C', label: 'Challenge' },
+              { id: 'settings', icon: '⚙', label: 'Settings' },
             ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setCurrentScreen(item.id as Screen)}
-                className="flex flex-col items-center gap-1 py-2 px-3 tap-target touch-manipulation"
+                className="flex flex-col items-center gap-1 py-2 px-2 tap-target touch-manipulation"
               >
                 <span className={`text-lg font-bold ${currentScreen === item.id ? 'gold-text' : ''}`}
                   style={{ color: currentScreen === item.id ? 'var(--gold-primary)' : 'var(--text-muted)' }}>
                   {item.icon}
                 </span>
-                <span className="text-xs" style={{
+                <span className="text-[10px]" style={{
                   color: currentScreen === item.id ? 'var(--gold-primary)' : 'var(--text-muted)',
                   fontWeight: currentScreen === item.id ? 600 : 400
                 }}>

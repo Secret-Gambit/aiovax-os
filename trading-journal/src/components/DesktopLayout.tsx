@@ -109,6 +109,27 @@ export function DesktopLayout({
   const [currentScreen, setCurrentScreen] = useState<DesktopScreen>('dashboard')
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null)
   const [duplicateTrade, setDuplicateTrade] = useState<Trade | null>(null)
+  const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
+
+  // Load current theme on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
+    if (savedTheme && themeColors[savedTheme]) {
+      setCurrentTheme(savedTheme)
+    }
+  }, [])
+
+  // Listen for theme changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
+      if (savedTheme && themeColors[savedTheme]) {
+        setCurrentTheme(savedTheme)
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -218,7 +239,12 @@ export function DesktopLayout({
       <aside className="dashboard-sidebar">
         <div className="sidebar-logo">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ 
+                background: `linear-gradient(135deg, ${themeColors[currentTheme].primary}, ${themeColors[currentTheme].secondary})`
+              }}
+            >
               <TrendingUp className="w-5 h-5 text-black" />
             </div>
             <div>
