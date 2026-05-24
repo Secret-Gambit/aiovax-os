@@ -409,15 +409,15 @@ export function QuickLogger({
           </div>
         </section>
 
-        {/* Entry Trigger - Single row scrollable */}
+        {/* Entry Trigger - Wrap layout */}
         <section>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>ENTRY</p>
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <div className="flex flex-wrap gap-2">
             {ENTRY_TRIGGERS.map(t => (
               <button
                 key={t}
                 onClick={() => setEntryTrigger(t)}
-                className={`flex-none px-3 py-2 rounded-xl text-xs font-medium tap-target touch-manipulation transition-all ${
+                className={`px-3 py-2 rounded-xl text-xs font-medium tap-target touch-manipulation transition-all ${
                   entryTrigger === t ? 'select-active' : 'phone-card select-inactive'
                 }`}
               >
@@ -472,12 +472,12 @@ export function QuickLogger({
               className="w-full h-1.5 rounded-full appearance-none cursor-pointer mb-2"
               style={{ background: 'var(--bg-tertiary)' }}
             />
-            <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+            <div className="flex flex-wrap gap-1">
               {SNAP_POINTS.map(p => (
                 <button
                   key={p}
                   onClick={() => setRMultiple(p)}
-                  className={`flex-none px-2 py-1 rounded text-xs font-medium tap-target touch-manipulation transition-all ${
+                  className={`px-2 py-1 rounded text-xs font-medium tap-target touch-manipulation transition-all ${
                     Math.abs(rMultiple - p) < 0.1 ? 'gold-accent' : 'select-inactive'
                   }`}
                 >
