@@ -1,7 +1,7 @@
 // Service Worker for XAUUSD Trading Journal PWA
 // Increment version to force update: v2 -> v3 -> etc.
 
-const CACHE_NAME = "xauusd-journal-v3";
+const CACHE_NAME = "aiovax-journal-v4";
 
 // Core files that must be cached (these don't have hashes)
 const CORE_ASSETS = ["/", "/index.html", "/manifest.json", "/gold-icon.svg"];
