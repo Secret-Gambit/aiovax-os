@@ -110,6 +110,7 @@ export function DesktopLayout({
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null)
   const [duplicateTrade, setDuplicateTrade] = useState<Trade | null>(null)
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
+  const [traderName, setTraderName] = useState('Trader')
 
   // Load current theme and listen for changes
   useEffect(() => {
@@ -123,10 +124,20 @@ export function DesktopLayout({
     // Load initial theme
     loadTheme()
     
+    // Load trader name
+    const savedName = localStorage.getItem('trading-journal-trader-name')
+    if (savedName) {
+      setTraderName(savedName)
+    }
+    
     // Listen for storage changes (from other tabs)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'trading-journal-theme') {
         loadTheme()
+      }
+      if (e.key === 'trading-journal-trader-name') {
+        const name = localStorage.getItem('trading-journal-trader-name')
+        if (name) setTraderName(name)
       }
     }
     window.addEventListener('storage', handleStorageChange)
@@ -263,6 +274,11 @@ export function DesktopLayout({
               <h1 className="font-bold text-lg">AIOVAX</h1>
               <p className="text-xs text-[var(--text-muted)]">Trading Journal</p>
             </div>
+          </div>
+          {/* Trader Name */}
+          <div className="mt-3 pt-3 border-t border-[var(--border-soft)]">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Welcome,</p>
+            <p className="font-semibold text-[var(--gold-primary)] truncate">{traderName}</p>
           </div>
         </div>
 
@@ -850,12 +866,17 @@ function AnalyticsView({
 function SettingsView() {
   const [activeSection, setActiveSection] = useState<'general' | 'data' | 'about'>('general')
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>('gold')
+  const [traderName, setTraderName] = useState('')
 
-  // Load theme on mount
+  // Load settings on mount
   useEffect(() => {
     const saved = localStorage.getItem('trading-journal-theme') as ThemeColor
+    const savedName = localStorage.getItem('trading-journal-trader-name')
     if (saved && themeColors[saved]) {
       setCurrentTheme(saved)
+    }
+    if (savedName) {
+      setTraderName(savedName)
     }
   }, [])
 
@@ -878,14 +899,51 @@ function SettingsView() {
       challenge: JSON.parse(localStorage.getItem('challenge') || 'null'),
       weeklyGoal: JSON.parse(localStorage.getItem('weeklyGoal') || 'null'),
       templates: JSON.parse(localStorage.getItem('tradeTemplates') || '[]'),
+      theme: localStorage.getItem('trading-journal-theme'),
+      traderName: localStorage.getItem('trading-journal-trader-name'),
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `trading-journal-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.download = `aiovax-backup-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  const handleImportData = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target?.result as string)
+          if (data.trades) localStorage.setItem('trades', JSON.stringify(data.trades))
+          if (data.challenge) localStorage.setItem('challenge', JSON.stringify(data.challenge))
+          if (data.weeklyGoal) localStorage.setItem('weeklyGoal', JSON.stringify(data.weeklyGoal))
+          if (data.templates) localStorage.setItem('tradeTemplates', JSON.stringify(data.templates))
+          if (data.theme) {
+            localStorage.setItem('trading-journal-theme', data.theme)
+            window.dispatchEvent(new Event('theme-changed'))
+          }
+          if (data.traderName) {
+            localStorage.setItem('trading-journal-trader-name', data.traderName)
+            window.dispatchEvent(new Event('trader-name-changed'))
+          }
+          alert('Data imported successfully! Page will reload.')
+          window.location.reload()
+        } catch (err) {
+          alert('Invalid backup file. Please select a valid AIOVAX backup.')
+        }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
   }
   
   const handleClearData = () => {
@@ -894,6 +952,9 @@ function SettingsView() {
       localStorage.removeItem('challenge')
       localStorage.removeItem('weeklyGoal')
       localStorage.removeItem('tradeTemplates')
+      localStorage.removeItem('trading-journal-trader-name')
+      localStorage.removeItem('trading-journal-theme')
+      localStorage.removeItem('trading-journal-onboarding')
       window.location.reload()
     }
   }
@@ -928,7 +989,27 @@ function SettingsView() {
       {/* General Settings */}
       {activeSection === 'general' && (
         <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-soft)] space-y-6">
+          {/* Trader Name */}
           <div>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Trader Profile</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Your name will be displayed on the dashboard.
+            </p>
+            <input
+              type="text"
+              value={traderName}
+              onChange={(e) => {
+                const name = e.target.value
+                setTraderName(name)
+                localStorage.setItem('trading-journal-trader-name', name)
+                window.dispatchEvent(new Event('trader-name-changed'))
+              }}
+              placeholder="Enter your name"
+              className="w-full max-w-md px-4 py-3 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-soft)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gold-primary)]"
+            />
+          </div>
+
+          <div className="border-t border-[var(--border-soft)] pt-6">
             <h3 className="font-semibold text-[var(--text-primary)] mb-2">Accent Color</h3>
             <p className="text-sm text-[var(--text-muted)] mb-4">
               Choose your preferred accent color theme.
@@ -988,12 +1069,30 @@ function SettingsView() {
           <div className="border-t border-[var(--border-soft)] pt-6">
             <h3 className="font-semibold text-[var(--text-primary)] mb-2">Import Data</h3>
             <p className="text-sm text-[var(--text-muted)] mb-4">
-              Restore your data from a backup file.
+              Restore your data from a backup file. This will overwrite your current data.
             </p>
-            <label className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg font-medium cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors inline-block">
-              <input type="file" accept=".json" className="hidden" />
+            <button
+              onClick={handleImportData}
+              className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg font-medium hover:bg-[var(--bg-secondary)] transition-colors"
+            >
               Import Backup
-            </label>
+            </button>
+          </div>
+          
+          <div className="border-t border-[var(--border-soft)] pt-6">
+            <h3 className="font-semibold text-[var(--text-primary)] mb-2">Cross-Device Sync</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              To use your data on another device:
+            </p>
+            <ol className="text-sm text-[var(--text-secondary)] space-y-2 mb-4 list-decimal list-inside">
+              <li>Export your data on this device</li>
+              <li>Transfer the .json file (email, cloud, USB)</li>
+              <li>Open AIOVAX on the other device</li>
+              <li>Import the backup file in Settings</li>
+            </ol>
+            <p className="text-xs text-[var(--text-muted)]">
+              Future versions will include automatic cloud sync.
+            </p>
           </div>
           
           <div className="border-t border-[var(--border-soft)] pt-6">
