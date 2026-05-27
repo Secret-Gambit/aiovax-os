@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Trade } from '../types/trade'
-import { TrendingUp, TrendingDown, List, Trash2, X, Check, Copy, Edit } from 'lucide-react'
+import { TrendingUp, TrendingDown, List, Trash2, X, Check, Copy, Edit, Eye, Clock, Calendar } from 'lucide-react'
 
 interface HistoryProps {
   allTimeTrades: Trade[]
@@ -11,6 +11,7 @@ interface HistoryProps {
 
 export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTrade }: HistoryProps) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [viewingTrade, setViewingTrade] = useState<Trade | null>(null)
   const sortedTrades = [...allTimeTrades].sort((a, b) => b.timestamp - a.timestamp)
 
   const formatDate = (timestamp: number) => {
@@ -18,6 +19,18 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const formatFullDate = (timestamp: number) => {
+    const date = new Date(timestamp)
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     })
@@ -119,6 +132,15 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                     <Copy size={16} />
                   </button>
                 )}
+                {/* View Button */}
+                <button
+                  onClick={() => setViewingTrade(trade)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/5"
+                  style={{ color: 'var(--text-muted)' }}
+                  title="View trade details"
+                >
+                  <Eye size={16} />
+                </button>
                 {/* Delete Button */}
                 <button
                   onClick={() => handleDelete(trade.id)}
@@ -192,6 +214,156 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
           </div>
         ))}
       </div>
+
+      {/* Trade Detail Modal */}
+      {viewingTrade && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+          onClick={() => setViewingTrade(null)}
+        >
+          <div 
+            className="phone-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 z-10 phone-card border-b border-white/10 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    viewingTrade.direction === 'buy' ? 'bg-green-500/20' : 'bg-red-500/20'
+                  }`}
+                >
+                  {viewingTrade.direction === 'buy' ? (
+                    <TrendingUp size={20} style={{ color: 'var(--profit)' }} />
+                  ) : (
+                    <TrendingDown size={20} style={{ color: 'var(--loss)' }} />
+                  )}
+                </div>
+                <div>
+                  <p className="font-bold text-lg">
+                    <span className="text-[var(--gold-primary)]">{viewingTrade.instrument || 'XAUUSD'}</span>
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {viewingTrade.setup.join(', ')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingTrade(null)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center tap-target transition-all hover:bg-white/10"
+                style={{ color: 'var(--text-muted)' }}
+                title="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 space-y-4">
+              {/* Result & R-Multiple */}
+              <div className="flex items-center justify-between">
+                <span 
+                  className={`px-4 py-2 rounded-xl font-bold text-lg ${
+                    viewingTrade.result === 'Win' 
+                      ? 'bg-green-500/20 text-green-400' 
+                      : viewingTrade.result === 'Loss'
+                      ? 'bg-red-500/20 text-red-400'
+                      : 'bg-gray-500/20 text-gray-400'
+                  }`}
+                >
+                  {viewingTrade.result}
+                </span>
+                <span 
+                  className={`text-3xl font-bold ${
+                    viewingTrade.result === 'Win' ? 'text-[var(--profit)]' : 'text-[var(--loss)]'
+                  }`}
+                >
+                  {viewingTrade.rMultiple > 0 ? '+' : ''}{viewingTrade.rMultiple.toFixed(2)}R
+                </span>
+              </div>
+
+              {/* Trade Details Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl p-3">
+                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Entry Trigger</p>
+                  <p className="font-semibold text-sm">{viewingTrade.entryTrigger}</p>
+                </div>
+                <div className="bg-[var(--bg-tertiary)] rounded-xl p-3">
+                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Emotion</p>
+                  <p className="font-semibold text-sm">{viewingTrade.emotion}</p>
+                </div>
+                {viewingTrade.marketContext && viewingTrade.marketContext !== 'Not Sure' && (
+                  <div className="bg-[var(--bg-tertiary)] rounded-xl p-3">
+                    <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Market Context</p>
+                    <p className="font-semibold text-sm">{viewingTrade.marketContext}</p>
+                  </div>
+                )}
+                {viewingTrade.entryTime && (
+                  <div className="bg-[var(--bg-tertiary)] rounded-xl p-3">
+                    <p className="text-xs mb-1 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                      <Clock size={12} />
+                      Entry Time
+                    </p>
+                    <p className="font-semibold text-sm">{viewingTrade.entryTime}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Date Logged */}
+              <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+                <Calendar size={14} />
+                <span>Logged: {formatFullDate(viewingTrade.timestamp)}</span>
+              </div>
+
+              {/* Notes */}
+              {viewingTrade.notes && (
+                <div className="bg-[var(--bg-tertiary)] rounded-xl p-4">
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Notes</p>
+                  <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--text-secondary)' }}>
+                    {viewingTrade.notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Full Size Chart Screenshot */}
+              {viewingTrade.image && (
+                <div>
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Chart Screenshot</p>
+                  <img 
+                    src={viewingTrade.image} 
+                    alt="Trade chart" 
+                    className="w-full rounded-xl"
+                    style={{ maxHeight: '400px', objectFit: 'contain' }}
+                  />
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                {onEditTrade && (
+                  <button
+                    onClick={() => {
+                      setViewingTrade(null)
+                      onEditTrade(viewingTrade)
+                    }}
+                    className="flex-1 py-3 rounded-xl font-semibold tap-target transition-all gold-accent"
+                  >
+                    Edit Trade
+                  </button>
+                )}
+                <button
+                  onClick={() => setViewingTrade(null)}
+                  className="flex-1 py-3 rounded-xl font-semibold tap-target transition-all phone-card"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
