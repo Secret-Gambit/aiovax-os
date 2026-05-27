@@ -24,7 +24,8 @@ export type Result = 'Win' | 'Loss' | 'Breakeven'
 export interface Trade {
   id: string
   timestamp: number
-  entryTime?: string // HH:MM format for trade entry time
+  entryTime?: string // HH:MM format for trade entry time (local time)
+  timezoneOffset?: number // Timezone offset in minutes from UTC (e.g., +180 for UTC+3, -300 for UTC-5)
   direction: Direction
   setup: SetupType[]
   entryTrigger: EntryTrigger
@@ -91,4 +92,5 @@ export interface TradeTemplate {
   marketContext: MarketContext
   emotion: Emotion
   entryTime?: string
+  timezoneOffset?: number
 }

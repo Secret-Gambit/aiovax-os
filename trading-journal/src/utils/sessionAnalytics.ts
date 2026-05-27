@@ -42,11 +42,33 @@ export function getSessionFromHour(hour: number): TradingSession {
   return 'Pre-Market'
 }
 
-// Get session from trade entry time
+// Convert local time to UTC hour
+export function convertToUTCHour(localHour: number, timezoneOffsetMinutes: number): number {
+  // timezoneOffset is in minutes (e.g., +180 for UTC+3, -300 for UTC-5)
+  // Positive offset means ahead of UTC, so we subtract to get UTC
+  // Negative offset means behind UTC, so we add to get UTC
+  let utcHour = localHour - (timezoneOffsetMinutes / 60)
+  
+  // Wrap around 24 hours
+  utcHour = ((utcHour % 24) + 24) % 24
+  
+  return utcHour
+}
+
+// Get session from trade entry time (converting local time to UTC)
 export function getSessionFromTrade(trade: Trade): TradingSession | null {
   if (!trade.entryTime) return null
-  const hour = parseTimeToHour(trade.entryTime)
-  return getSessionFromHour(hour)
+  
+  const localHour = parseTimeToHour(trade.entryTime)
+  
+  // If timezone offset is stored, convert to UTC first
+  if (trade.timezoneOffset !== undefined) {
+    const utcHour = convertToUTCHour(localHour, trade.timezoneOffset)
+    return getSessionFromHour(utcHour)
+  }
+  
+  // Fallback: assume time is already UTC (for backward compatibility)
+  return getSessionFromHour(localHour)
 }
 
 // Get session display info
@@ -227,8 +249,16 @@ export function calculateHourlyPerformance(trades: Trade[]): HourlyPerformance[]
 
   trades.forEach(trade => {
     if (!trade.entryTime) return
-    const hour = parseTimeToHour(trade.entryTime)
-    const stats = hourlyMap.get(hour)!
+    
+    const localHour = parseTimeToHour(trade.entryTime)
+    let utcHour = localHour
+    
+    // Convert to UTC if timezone offset is available
+    if (trade.timezoneOffset !== undefined) {
+      utcHour = convertToUTCHour(localHour, trade.timezoneOffset)
+    }
+    
+    const stats = hourlyMap.get(utcHour)!
     
     stats.trades++
     if (trade.result === 'Win') {

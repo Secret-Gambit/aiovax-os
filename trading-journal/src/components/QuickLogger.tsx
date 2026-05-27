@@ -81,6 +81,9 @@ export function QuickLogger({
   const handleSave = () => {
     if (!canSave) return
     
+    // Get browser's timezone offset in minutes (positive = behind UTC, negative = ahead of UTC)
+    const timezoneOffset = entryTime ? new Date().getTimezoneOffset() : undefined
+    
     if (isEditing && editingTrade && editTrade) {
       // Update existing trade
       editTrade(editingTrade.id, {
@@ -94,6 +97,7 @@ export function QuickLogger({
         notes: notes.trim() || undefined,
         image: image || undefined,
         entryTime: entryTime || undefined,
+        timezoneOffset: entryTime ? timezoneOffset : undefined,
       })
     } else {
       // Add new trade
@@ -108,6 +112,7 @@ export function QuickLogger({
         notes: notes.trim() || undefined,
         image: image || undefined,
         entryTime: entryTime || undefined,
+        timezoneOffset: entryTime ? timezoneOffset : undefined,
       })
     }
     onTradeLogged()
@@ -199,6 +204,7 @@ export function QuickLogger({
       marketContext: marketContext || 'Not Sure',
       emotion,
       entryTime: entryTime || undefined,
+      timezoneOffset: entryTime ? new Date().getTimezoneOffset() : undefined,
     })
     setTemplateName('')
     setShowSaveTemplate(false)

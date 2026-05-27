@@ -133,9 +133,14 @@ export function SessionPerformance({ sessionStats, hourlyPerformance }: SessionP
 
       {/* Hourly Heat Strip */}
       <div className="phone-card rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Clock size={16} className="text-[var(--text-muted)]" />
-          <p className="text-sm font-semibold text-[var(--text-primary)]">Hourly Performance (UTC)</p>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-[var(--text-muted)]" />
+            <p className="text-sm font-semibold text-[var(--text-primary)]">Hourly Performance (UTC)</p>
+          </div>
+          <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-tertiary)] px-2 py-1 rounded">
+            Your time: UTC{new Date().getTimezoneOffset() <= 0 ? '+' : '-'}{Math.abs(new Date().getTimezoneOffset() / 60)}
+          </span>
         </div>
         <div className="grid grid-cols-12 gap-1">
           {hourlyPerformance.slice(0, 24).map((hour) => (
