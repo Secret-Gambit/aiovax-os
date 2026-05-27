@@ -31,6 +31,7 @@ export function QuickLogger({
   const [setup, setSetup] = useState<SetupType[]>(editingTrade?.setup || initialTrade?.setup || [])
   const [entryTrigger, setEntryTrigger] = useState<EntryTrigger | null>(editingTrade?.entryTrigger || initialTrade?.entryTrigger || null)
   const [marketContext, setMarketContext] = useState<MarketContext | null>(editingTrade?.marketContext || initialTrade?.marketContext || null)
+  const [entryTime, setEntryTime] = useState<string>(editingTrade?.entryTime || initialTrade?.entryTime || '')
   const [emotion, setEmotion] = useState<Emotion | null>(editingTrade?.emotion || initialTrade?.emotion || null)
   const [emotionIntensity, setEmotionIntensity] = useState(() => {
     const e = editingTrade?.emotion || initialTrade?.emotion
@@ -92,6 +93,7 @@ export function QuickLogger({
         rMultiple: result === 'Loss' ? -Math.abs(rMultiple) : rMultiple,
         notes: notes.trim() || undefined,
         image: image || undefined,
+        entryTime: entryTime || undefined,
       })
     } else {
       // Add new trade
@@ -105,6 +107,7 @@ export function QuickLogger({
         rMultiple: result === 'Loss' ? -Math.abs(rMultiple) : rMultiple,
         notes: notes.trim() || undefined,
         image: image || undefined,
+        entryTime: entryTime || undefined,
       })
     }
     onTradeLogged()
@@ -115,6 +118,7 @@ export function QuickLogger({
     setSetup([])
     setEntryTrigger(null)
     setMarketContext(null)
+    setEntryTime('')
     setEmotion(null)
     setResult(null)
     setRMultiple(0)
@@ -179,6 +183,7 @@ export function QuickLogger({
     setEntryTrigger(template.entryTrigger)
     setMarketContext(template.marketContext)
     setEmotion(template.emotion)
+    setEntryTime(template.entryTime || '')
     setShowTemplates(false)
   }
 
@@ -193,6 +198,7 @@ export function QuickLogger({
       entryTrigger,
       marketContext: marketContext || 'Not Sure',
       emotion,
+      entryTime: entryTime || undefined,
     })
     setTemplateName('')
     setShowSaveTemplate(false)
@@ -443,6 +449,32 @@ export function QuickLogger({
                 {t}
               </button>
             ))}
+          </div>
+        </section>
+
+        {/* Entry Time */}
+        <section>
+          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>ENTRY TIME (Optional)</p>
+          <div className="phone-card rounded-xl p-3 flex items-center gap-3">
+            <input
+              type="time"
+              value={entryTime}
+              onChange={(e) => setEntryTime(e.target.value)}
+              className="flex-1 bg-transparent text-sm outline-none"
+              style={{ color: 'var(--text-primary)' }}
+              title="Select entry time"
+              aria-label="Trade entry time"
+            />
+            {entryTime && (
+              <button
+                onClick={() => setEntryTime('')}
+                className="p-1 rounded-full hover:bg-white/10"
+                style={{ color: 'var(--text-muted)' }}
+                title="Clear time"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
         </section>
 

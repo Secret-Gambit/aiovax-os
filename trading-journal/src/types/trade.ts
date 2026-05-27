@@ -24,6 +24,7 @@ export type Result = 'Win' | 'Loss' | 'Breakeven'
 export interface Trade {
   id: string
   timestamp: number
+  entryTime?: string // HH:MM format for trade entry time
   direction: Direction
   setup: SetupType[]
   entryTrigger: EntryTrigger
@@ -89,4 +90,5 @@ export interface TradeTemplate {
   entryTrigger: EntryTrigger
   marketContext: MarketContext
   emotion: Emotion
+  entryTime?: string
 }
