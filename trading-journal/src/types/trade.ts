@@ -1,5 +1,7 @@
 export type Direction = 'buy' | 'sell'
 
+export type Instrument = 'XAUUSD' | 'BTCUSD' | 'GBPUSD' | 'NASDAQ' | 'US30'
+
 export type SetupType = 'FVG' | 'Order Block' | 'Liquidity Sweep' | 'Imbalance Gap' | 'Break of Structure' | 'Other'
 
 export type EntryTrigger = 
@@ -24,6 +26,7 @@ export type Result = 'Win' | 'Loss' | 'Breakeven'
 export interface Trade {
   id: string
   timestamp: number
+  instrument: Instrument
   entryTime?: string // HH:MM format for trade entry time (local time)
   timezoneOffset?: number // Timezone offset in minutes from UTC (e.g., +180 for UTC+3, -300 for UTC-5)
   direction: Direction
@@ -36,6 +39,14 @@ export interface Trade {
   notes?: string
   image?: string // base64 compressed image
 }
+
+export const INSTRUMENTS: Instrument[] = [
+  'XAUUSD',
+  'BTCUSD',
+  'GBPUSD',
+  'NASDAQ',
+  'US30',
+]
 
 export const SETUP_OPTIONS: SetupType[] = [
   'FVG',
@@ -86,6 +97,7 @@ export const isRevengeTrade = (emotion: Emotion): boolean => {
 export interface TradeTemplate {
   id: string
   name: string
+  instrument: Instrument
   direction: Direction
   setup: SetupType[]
   entryTrigger: EntryTrigger

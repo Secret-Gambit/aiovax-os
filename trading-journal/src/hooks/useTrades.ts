@@ -18,8 +18,13 @@ export const useTrades = () => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const parsed = JSON.parse(stored)
-        setTrades(parsed)
+        const parsed = JSON.parse(stored) as Trade[]
+        // Backward compatibility: ensure all trades have an instrument field
+        const migrated = parsed.map(trade => ({
+          ...trade,
+          instrument: trade.instrument || 'XAUUSD', // Default to XAUUSD for existing trades
+        }))
+        setTrades(migrated)
       } catch (e) {
         console.error('Failed to parse trades:', e)
       }

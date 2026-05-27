@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { TrendingUp, TrendingDown, Check, Mic, MicOff, Save, X, ChevronDown, FileText, Camera, Image as ImageIcon } from 'lucide-react'
-import type { Trade, Direction, SetupType, EntryTrigger, MarketContext, Emotion, Result, TradeTemplate } from '../types/trade'
-import { SETUP_OPTIONS, ENTRY_TRIGGERS, RESULTS, SNAP_POINTS } from '../types/trade'
+import type { Trade, Direction, Instrument, SetupType, EntryTrigger, MarketContext, Emotion, Result, TradeTemplate } from '../types/trade'
+import { INSTRUMENTS, SETUP_OPTIONS, ENTRY_TRIGGERS, RESULTS, SNAP_POINTS } from '../types/trade'
 import { EmotionIntensitySlider } from './visualizations'
 
 interface QuickLoggerProps {
@@ -27,6 +27,7 @@ export function QuickLogger({
 }: QuickLoggerProps) {
   const isEditing = !!editingTrade
   
+  const [instrument, setInstrument] = useState<Instrument>(editingTrade?.instrument || initialTrade?.instrument || 'XAUUSD')
   const [direction, setDirection] = useState<Direction | null>(editingTrade?.direction || initialTrade?.direction || null)
   const [setup, setSetup] = useState<SetupType[]>(editingTrade?.setup || initialTrade?.setup || [])
   const [entryTrigger, setEntryTrigger] = useState<EntryTrigger | null>(editingTrade?.entryTrigger || initialTrade?.entryTrigger || null)
@@ -87,6 +88,7 @@ export function QuickLogger({
     if (isEditing && editingTrade && editTrade) {
       // Update existing trade
       editTrade(editingTrade.id, {
+        instrument,
         direction,
         setup,
         entryTrigger,
@@ -102,6 +104,7 @@ export function QuickLogger({
     } else {
       // Add new trade
       addTrade({
+        instrument,
         direction,
         setup,
         entryTrigger,
@@ -119,6 +122,7 @@ export function QuickLogger({
   }
 
   const handleReset = () => {
+    setInstrument('XAUUSD')
     setDirection(null)
     setSetup([])
     setEntryTrigger(null)
@@ -183,6 +187,7 @@ export function QuickLogger({
   }
 
   const applyTemplate = (template: TradeTemplate) => {
+    setInstrument(template.instrument)
     setDirection(template.direction)
     setSetup(template.setup)
     setEntryTrigger(template.entryTrigger)
@@ -198,6 +203,7 @@ export function QuickLogger({
     
     onSaveTemplate({
       name: templateName.trim(),
+      instrument,
       direction,
       setup,
       entryTrigger,
@@ -210,8 +216,8 @@ export function QuickLogger({
     setShowSaveTemplate(false)
   }
 
-  const progress = [direction, setup.length > 0, entryTrigger, emotion, result].filter(Boolean).length
-  const totalSteps = 5
+  const progress = [instrument, direction, setup.length > 0, entryTrigger, emotion, result].filter(Boolean).length
+  const totalSteps = 6
 
   // Voice recognition functions
   const startListening = () => {
@@ -324,7 +330,7 @@ export function QuickLogger({
                 >
                   <span className="font-medium">{template.name}</span>
                   <span className="text-xs ml-2" style={{ color: 'var(--text-muted)' }}>
-                    {template.direction} • {template.setup.join(', ')}
+                    {template.instrument} • {template.direction} • {template.setup.join(', ')}
                   </span>
                 </button>
                 {onDeleteTemplate && (
@@ -397,6 +403,25 @@ export function QuickLogger({
 
       {/* Compact scrollable content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide px-5 py-2 space-y-3">
+        {/* Instrument - Compact */}
+        <section>
+          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>INSTRUMENT</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {INSTRUMENTS.map((inst) => (
+              <button
+                key={inst}
+                onClick={() => setInstrument(inst)}
+                className={`py-2.5 rounded-xl font-semibold text-xs tap-target touch-manipulation transition-all ${
+                  instrument === inst ? 'gold-accent scale-[1.02]' : 'phone-card select-inactive'
+                }`}
+                title={inst}
+              >
+                {inst}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* Direction - Compact */}
         <section>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>DIRECTION</p>

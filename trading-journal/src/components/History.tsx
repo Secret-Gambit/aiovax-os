@@ -79,7 +79,11 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                   )}
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">{trade.setup.join(', ') || 'Trade'}</p>
+                  <p className="font-semibold text-sm">
+                    <span className="text-[var(--gold-primary)]">{trade.instrument || 'XAUUSD'}</span>
+                    <span className="text-[var(--text-muted)] mx-1">•</span>
+                    {trade.setup.join(', ') || 'Trade'}
+                  </p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {formatDate(trade.timestamp)}
                   </p>

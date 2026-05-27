@@ -87,6 +87,31 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade, sessi
       .sort((a, b) => b.trades - a.trades)
   }
 
+  const instrumentPerformance = () => {
+    const instrumentStats = new Map<string, { trades: number; wins: number; netR: number }>()
+
+    allTimeTrades.forEach(t => {
+      const inst = t.instrument || 'XAUUSD'
+      const current = instrumentStats.get(inst) || { trades: 0, wins: 0, netR: 0 }
+      current.trades++
+      if (t.result === 'Win') {
+        current.wins++
+        current.netR += t.rMultiple
+      } else if (t.result === 'Loss') {
+        current.netR -= Math.abs(t.rMultiple)
+      }
+      instrumentStats.set(inst, current)
+    })
+
+    return Array.from(instrumentStats.entries())
+      .map(([name, s]) => ({
+        name,
+        ...s,
+        winRate: s.trades > 0 ? (s.wins / s.trades) * 100 : 0,
+      }))
+      .sort((a, b) => b.netR - a.netR)
+  }
+
   const handleReplay = () => {
     setShowReplay(true)
     setReplayIndex(0)
@@ -400,6 +425,35 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade, sessi
 
         {/* Setup Performance Bars */}
         <SetupPerformanceBars trades={allTimeTrades} />
+
+        {/* Instrument Performance */}
+        {(() => {
+          const instruments = instrumentPerformance()
+          if (instruments.length <= 1) return null
+          return (
+            <div className="phone-card p-4 rounded-xl">
+              <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">Performance by Instrument</p>
+              <div className="space-y-2">
+                {instruments.map(({ name, trades, wins, netR, winRate }) => (
+                  <div key={name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-[var(--text-primary)]">{name}</span>
+                      <span className="text-xs text-[var(--text-muted)]">({trades} trades)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-medium ${winRate >= 50 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'}`}>
+                        {winRate.toFixed(0)}%
+                      </span>
+                      <span className={`text-sm font-bold ${netR >= 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'}`}>
+                        {netR >= 0 ? '+' : ''}{netR.toFixed(1)}R
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Setup Trends Sparklines */}
         <SetupTrends trades={allTimeTrades} />
