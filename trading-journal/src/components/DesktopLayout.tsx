@@ -533,7 +533,7 @@ function DashboardOverview({
             Recent Trades
           </h2>
           <button 
-            onClick={onStartNewTrade}
+            onClick={() => setCurrentScreen('history')}
             className="text-sm text-[var(--gold-primary)] hover:text-[var(--gold-secondary)] font-medium transition-colors"
           >
             View All
