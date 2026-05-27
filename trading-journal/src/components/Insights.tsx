@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import type { Trade } from '../types/trade'
-import { TrendingUp, TrendingDown, Zap, BarChart3, Play, X, ChevronLeft, ChevronRight, CheckCircle2, XCircle, MinusCircle, Smile, Frown, AlertTriangle, Flame, Meh, Calendar } from 'lucide-react'
+import type { SessionStats, HourlyPerformance } from '../utils/sessionAnalytics'
+import { TrendingUp, TrendingDown, Zap, BarChart3, Play, X, ChevronLeft, ChevronRight, CheckCircle2, XCircle, MinusCircle, Smile, Frown, AlertTriangle, Flame, Meh, Calendar, Clock } from 'lucide-react'
 import { Calendar as CalendarComponent } from './Calendar'
 import { RMHistogram, SetupPerformanceBars, DailyHeatStrip, WinRateGauge, DisciplineScoreRing, SetupTrends } from './visualizations'
+import { SessionPerformance } from './SessionPerformance'
 
 interface InsightsProps {
   stats: {
@@ -29,12 +31,14 @@ interface InsightsProps {
   todayTrades: Trade[]
   allTimeTrades: Trade[]
   deleteTrade: (id: string) => void
+  sessionStats?: SessionStats[]
+  hourlyPerformance?: HourlyPerformance[]
 }
 
-export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade }: InsightsProps) {
+export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade, sessionStats = [], hourlyPerformance = [] }: InsightsProps) {
   const [showReplay, setShowReplay] = useState(false)
   const [replayIndex, setReplayIndex] = useState(0)
-  const [activeTab, setActiveTab] = useState<'insights' | 'calendar'>('insights')
+  const [activeTab, setActiveTab] = useState<'insights' | 'calendar' | 'sessions'>('insights')
 
   const { allTime } = stats
 
@@ -290,12 +294,26 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade }: Ins
             <Calendar size={16} />
             Calendar
           </button>
+          <button
+            onClick={() => setActiveTab('sessions')}
+            className={`flex-1 py-2.5 text-sm font-medium tap-target transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'sessions' ? 'gold-accent' : ''
+            }`}
+            style={{ color: activeTab === 'sessions' ? undefined : 'var(--text-muted)' }}
+          >
+            <Clock size={16} />
+            Sessions
+          </button>
         </div>
       </div>
 
       {/* Content based on active tab */}
       {activeTab === 'calendar' ? (
         <CalendarComponent allTimeTrades={allTimeTrades} />
+      ) : activeTab === 'sessions' ? (
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-5 py-4">
+          <SessionPerformance sessionStats={sessionStats} hourlyPerformance={hourlyPerformance} />
+        </div>
       ) : (
         <div className="flex-1 overflow-y-auto scrollbar-hide px-5 py-4 space-y-4">
           {/* Replay Today Button */}

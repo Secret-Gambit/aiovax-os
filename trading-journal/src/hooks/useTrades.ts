@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { Trade } from '../types/trade'
+import { calculateSessionStats, calculateHourlyPerformance, type SessionStats, type HourlyPerformance } from '../utils/sessionAnalytics'
 
 const STORAGE_KEY = 'xauusd-trades'
 
@@ -186,6 +187,10 @@ export const useTrades = () => {
     }
   }, [todayTrades, allTimeTrades])
 
+  // Session-based analytics
+  const sessionStats = useMemo(() => calculateSessionStats(allTimeTrades), [allTimeTrades])
+  const hourlyPerformance = useMemo(() => calculateHourlyPerformance(allTimeTrades), [allTimeTrades])
+
   const disciplineAlerts = useMemo((): DisciplineAlert[] => {
     const alerts: DisciplineAlert[] = []
     const today = todayTrades
@@ -259,6 +264,8 @@ export const useTrades = () => {
     allTimeTrades,
     stats,
     disciplineAlerts,
+    sessionStats,
+    hourlyPerformance,
     addTrade,
     deleteTrade,
     updateTrade,

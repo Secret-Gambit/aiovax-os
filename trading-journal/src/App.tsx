@@ -32,6 +32,8 @@ function App() {
     allTimeTrades,
     stats,
     disciplineAlerts,
+    sessionStats,
+    hourlyPerformance,
     addTrade,
     deleteTrade,
     updateTrade,
@@ -200,6 +202,8 @@ function App() {
             todayTrades={todayTrades}
             allTimeTrades={allTimeTrades}
             deleteTrade={deleteTrade}
+            sessionStats={sessionStats}
+            hourlyPerformance={hourlyPerformance}
           />
         )
       case 'history':
