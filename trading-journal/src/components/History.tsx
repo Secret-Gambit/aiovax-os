@@ -114,42 +114,47 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                 {onEditTrade && (
                   <button
                     onClick={() => onEditTrade(trade)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/5"
+                    className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
                     style={{ color: 'var(--text-muted)' }}
                     title="Edit trade"
+                    aria-label="Edit trade"
                   >
-                    <Edit size={16} />
+                    <Edit size={18} />
                   </button>
                 )}
                 {/* Duplicate Button */}
                 {onDuplicateTrade && (
                   <button
                     onClick={() => onDuplicateTrade(trade)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/5"
+                    className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
                     style={{ color: 'var(--text-muted)' }}
                     title="Duplicate trade"
+                    aria-label="Duplicate trade"
                   >
-                    <Copy size={16} />
+                    <Copy size={18} />
                   </button>
                 )}
                 {/* View Button */}
                 <button
                   onClick={() => setViewingTrade(trade)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/5"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
                   style={{ color: 'var(--text-muted)' }}
                   title="View trade details"
+                  aria-label="View trade details"
                 >
-                  <Eye size={16} />
+                  <Eye size={18} />
                 </button>
                 {/* Delete Button */}
                 <button
                   onClick={() => handleDelete(trade.id)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all ${
-                    deleteConfirm === trade.id ? 'bg-red-500/20' : 'hover:bg-white/5'
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all active:scale-95 cursor-pointer ${
+                    deleteConfirm === trade.id ? 'bg-red-500/20' : 'hover:bg-white/10'
                   }`}
                   style={{ color: deleteConfirm === trade.id ? 'var(--loss)' : 'var(--text-muted)' }}
+                  title={deleteConfirm === trade.id ? 'Confirm delete' : 'Delete trade'}
+                  aria-label={deleteConfirm === trade.id ? 'Confirm delete' : 'Delete trade'}
                 >
-                  {deleteConfirm === trade.id ? <Check size={16} /> : <Trash2 size={16} />}
+                  {deleteConfirm === trade.id ? <Check size={18} /> : <Trash2 size={18} />}
                 </button>
               </div>
             </div>
@@ -251,9 +256,10 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
               </div>
               <button
                 onClick={() => setViewingTrade(null)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center tap-target transition-all hover:bg-white/10"
+                className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
                 style={{ color: 'var(--text-muted)' }}
                 title="Close"
+                aria-label="Close trade details"
               >
                 <X size={20} />
               </button>
