@@ -193,6 +193,7 @@ export function DesktopLayout({
           weeklyProgress={weeklyProgress}
           isWeeklyGoalReached={isWeeklyGoalReached}
           onStartNewTrade={() => setCurrentScreen('logger')}
+          onViewAllHistory={() => setCurrentScreen('history')}
         />
       case 'logger':
         return (
@@ -386,7 +387,8 @@ function DashboardOverview({
   weeklyGoal,
   weeklyProgress,
   isWeeklyGoalReached,
-  onStartNewTrade
+  onStartNewTrade,
+  onViewAllHistory
 }: {
   stats: DesktopLayoutProps['stats']
   todayTrades: Trade[]
@@ -396,6 +398,7 @@ function DashboardOverview({
   weeklyProgress: number
   isWeeklyGoalReached: boolean
   onStartNewTrade: () => void
+  onViewAllHistory: () => void
 }) {
   return (
     <div className="space-y-6">
@@ -533,8 +536,8 @@ function DashboardOverview({
             Recent Trades
           </h2>
           <button 
-            onClick={() => setCurrentScreen('history')}
-            className="text-sm text-[var(--gold-primary)] hover:text-[var(--gold-secondary)] font-medium transition-colors"
+            onClick={onViewAllHistory}
+            className="text-sm text-[var(--gold-primary)] hover:text-[var(--gold-secondary)] font-medium transition-colors cursor-pointer"
           >
             View All
           </button>

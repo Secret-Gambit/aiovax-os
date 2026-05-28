@@ -491,22 +491,30 @@ export function QuickLogger({
               type="time"
               value={entryTime}
               onChange={(e) => setEntryTime(e.target.value)}
-              className="flex-1 bg-transparent text-sm outline-none"
-              style={{ color: 'var(--text-primary)' }}
+              className="flex-1 bg-transparent text-sm outline-none min-h-[44px] cursor-pointer"
+              style={{ 
+                color: 'var(--text-primary)',
+                WebkitAppearance: 'none',
+                appearance: 'none'
+              }}
               title="Select entry time"
               aria-label="Trade entry time"
             />
             {entryTime && (
               <button
                 onClick={() => setEntryTime('')}
-                className="p-1 rounded-full hover:bg-white/10"
+                className="p-2 rounded-full hover:bg-white/10 tap-target transition-colors"
                 style={{ color: 'var(--text-muted)' }}
                 title="Clear time"
+                aria-label="Clear entry time"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             )}
           </div>
+          <p className="text-[10px] mt-1 ml-1" style={{ color: 'var(--text-muted)' }}>
+            {entryTime ? `Selected: ${entryTime}` : 'Tap to set trade time'}
+          </p>
         </section>
 
         {/* Emotion - Intensity Slider */}

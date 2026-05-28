@@ -401,6 +401,59 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade, sessi
                 </div>
                 <p className="text-2xl font-bold text-[var(--text-primary)]">{allTime.avgR.toFixed(2)}R</p>
               </div>
+
+              {/* Profit Factor */}
+              {(() => {
+                const winningTrades = allTimeTrades.filter(t => t.result === 'Win')
+                const losingTrades = allTimeTrades.filter(t => t.result === 'Loss')
+                const grossProfit = winningTrades.reduce((sum, t) => sum + t.rMultiple, 0)
+                const grossLoss = Math.abs(losingTrades.reduce((sum, t) => sum + Math.abs(t.rMultiple), 0))
+                const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? Infinity : 0)
+                const pfColor = profitFactor >= 1.5 ? 'var(--profit)' : profitFactor >= 1 ? 'var(--gold-primary)' : 'var(--loss)'
+                const pfBg = profitFactor >= 1.5 ? 'var(--profit-soft)' : profitFactor >= 1 ? 'var(--gold-soft)' : 'var(--loss-soft)'
+                return (
+                  <div className="phone-card p-4 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: pfBg }}>
+                        <BarChart3 size={16} style={{ color: pfColor }} />
+                      </div>
+                      <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Profit Factor</span>
+                    </div>
+                    <p className="text-2xl font-bold" style={{ color: pfColor }}>
+                      {profitFactor === Infinity ? '∞' : profitFactor.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">
+                      {profitFactor >= 2 ? 'Excellent' : profitFactor >= 1.5 ? 'Good' : profitFactor >= 1 ? 'Break-even' : 'Poor'}
+                    </p>
+                  </div>
+                )
+              })()}
+
+              {/* Expectancy */}
+              {(() => {
+                const winningTrades = allTimeTrades.filter(t => t.result === 'Win')
+                const losingTrades = allTimeTrades.filter(t => t.result === 'Loss')
+                const grossProfit = winningTrades.reduce((sum, t) => sum + t.rMultiple, 0)
+                const grossLoss = Math.abs(losingTrades.reduce((sum, t) => sum + Math.abs(t.rMultiple), 0))
+                const avgWin = winningTrades.length > 0 ? grossProfit / winningTrades.length : 0
+                const avgLoss = losingTrades.length > 0 ? grossLoss / losingTrades.length : 0
+                const winRate = allTime.winRate / 100
+                const expectancy = (winRate * avgWin) - ((1 - winRate) * avgLoss)
+                return (
+                  <div className="phone-card p-4 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${expectancy > 0 ? 'bg-[var(--profit-soft)]' : 'bg-[var(--loss-soft)]'}`}>
+                        <TrendingUp size={16} className={expectancy > 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'} />
+                      </div>
+                      <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Expectancy</span>
+                    </div>
+                    <p className={`text-2xl font-bold ${expectancy > 0 ? 'text-[var(--profit)]' : 'text-[var(--loss)]'}`}>
+                      {expectancy > 0 ? '+' : ''}{expectancy.toFixed(2)}R
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Expected per trade</p>
+                  </div>
+                )
+              })()}
             </div>
           </section>
 

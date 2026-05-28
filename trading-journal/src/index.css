@@ -263,13 +263,13 @@
 
 @layer utilities {
   .tap-target {
-    min-height: 56px;
-    min-width: 56px;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .big-tap-target {
-    min-height: 72px;
-    min-width: 72px;
+    min-height: 56px;
+    min-width: 56px;
   }
 
   .touch-manipulation {
@@ -282,6 +282,40 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Enhanced touch feedback per UI/UX guidelines */
+  .touch-feedback {
+    transition:
+      transform 0.15s ease,
+      background-color 0.2s ease;
+  }
+
+  .touch-feedback:active {
+    transform: scale(0.96);
+  }
+
+  /* Cursor pointer for all interactive elements */
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  /* Smooth transitions for hover states */
+  .hover-lift {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Focus visible for keyboard navigation */
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--gold-primary);
+    outline-offset: 2px;
   }
 
   /* Phone UI cards - clean solid backgrounds */

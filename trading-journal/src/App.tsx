@@ -359,16 +359,28 @@ function App() {
               <button
                 key={item.id}
                 onClick={() => setCurrentScreen(item.id as Screen)}
-                className={`flex flex-col items-center tap-target touch-manipulation ${item.isCenter ? 'relative -top-3' : 'gap-1 py-2 px-1'}`}
+                aria-label={item.label}
+                className={`flex flex-col items-center tap-target touch-manipulation cursor-pointer transition-all duration-200 active:scale-95 ${
+                  item.isCenter ? 'relative -top-3' : 'gap-1 py-2 px-1 rounded-xl hover:bg-[var(--bg-tertiary)]'
+                } ${currentScreen === item.id && !item.isCenter ? 'bg-[var(--gold-soft)]' : ''}`}
               >
                 {item.isCenter ? (
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg ${currentScreen === item.id ? 'gold-accent' : 'bg-[var(--bg-card)] border border-[var(--border-soft)]'}`}>
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-90 ${
+                    currentScreen === item.id 
+                      ? 'gold-accent shadow-[var(--gold-glow)]' 
+                      : 'bg-[var(--bg-card)] border border-[var(--border-soft)] hover:border-[var(--gold-primary)]/50'
+                  }`}>
                     <item.Icon size={24} className={currentScreen === item.id ? 'text-black' : 'text-[var(--gold-primary)]'} />
                   </div>
                 ) : (
-                  <item.Icon size={20} className={currentScreen === item.id ? 'text-[var(--gold-primary)]' : 'text-[var(--text-muted)]'} />
+                  <item.Icon 
+                    size={20} 
+                    className={`transition-colors duration-200 ${
+                      currentScreen === item.id ? 'text-[var(--gold-primary)]' : 'text-[var(--text-muted)]'
+                    }`} 
+                  />
                 )}
-                <span className={`text-[10px] ${item.isCenter ? 'mt-1' : ''}`} style={{
+                <span className={`text-[10px] transition-all duration-200 ${item.isCenter ? 'mt-1' : ''}`} style={{
                   color: currentScreen === item.id ? 'var(--gold-primary)' : 'var(--text-muted)',
                   fontWeight: currentScreen === item.id ? 600 : 400
                 }}>

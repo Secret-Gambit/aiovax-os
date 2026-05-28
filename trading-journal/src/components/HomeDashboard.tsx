@@ -207,7 +207,7 @@ export function HomeDashboard({
       <div className="flex-none py-3">
         <button
           onClick={onStartNewTrade}
-          className="w-full py-4 rounded-2xl gold-accent font-bold text-lg tap-target touch-manipulation active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl gold-accent font-bold text-lg tap-target touch-manipulation cursor-pointer transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-[var(--gold-glow)] active:scale-[0.96] flex items-center justify-center gap-2"
         >
           <Plus size={20} />
           <span>LOG NEW TRADE</span>

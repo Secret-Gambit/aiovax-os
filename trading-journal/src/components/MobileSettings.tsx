@@ -8,7 +8,10 @@ import {
   ChevronRight,
   Check,
   User,
-  Smartphone
+  Smartphone,
+  Upload,
+  Bell,
+  RefreshCw
 } from 'lucide-react'
 import { themeColors, type ThemeColor } from '../hooks/useTheme'
 
@@ -27,16 +30,22 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
   const [traderName, setTraderName] = useState('')
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [notifications, setNotifications] = useState(false)
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   // Load saved preferences and check install status
   useEffect(() => {
     const savedTheme = localStorage.getItem('trading-journal-theme') as ThemeColor
     const savedName = localStorage.getItem('trading-journal-trader-name')
+    const savedNotifications = localStorage.getItem('trading-journal-notifications')
     if (savedTheme && themeColors[savedTheme]) {
       setCurrentTheme(savedTheme)
     }
     if (savedName) {
       setTraderName(savedName)
+    }
+    if (savedNotifications) {
+      setNotifications(savedNotifications === 'true')
     }
 
     // Check if already installed
@@ -98,6 +107,51 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
   const handleUpdateName = (name: string) => {
     setTraderName(name)
     localStorage.setItem('trading-journal-trader-name', name)
+  }
+
+  const handleImportData = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target?.result as string)
+          if (data.trades) localStorage.setItem('trading-journal-trades', JSON.stringify(data.trades))
+          if (data.challenge) localStorage.setItem('trading-journal-challenge', JSON.stringify(data.challenge))
+          if (data.weeklyGoals) localStorage.setItem('trading-journal-weekly-goals', JSON.stringify(data.weeklyGoals))
+          if (data.templates) localStorage.setItem('trading-journal-templates', JSON.stringify(data.templates))
+          if (data.theme) {
+            localStorage.setItem('trading-journal-theme', data.theme)
+            window.dispatchEvent(new Event('theme-changed'))
+          }
+          if (data.traderName) {
+            localStorage.setItem('trading-journal-trader-name', data.traderName)
+            setTraderName(data.traderName)
+          }
+          setImportStatus('success')
+          setTimeout(() => {
+            setImportStatus('idle')
+            window.location.reload()
+          }, 1500)
+        } catch (err) {
+          setImportStatus('error')
+          setTimeout(() => setImportStatus('idle'), 3000)
+        }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
+  }
+
+  const handleNotificationsToggle = () => {
+    const newValue = !notifications
+    setNotifications(newValue)
+    localStorage.setItem('trading-journal-notifications', newValue.toString())
   }
 
   return (
@@ -185,6 +239,34 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
                 ))}
               </div>
             </div>
+
+            {/* Notifications Toggle */}
+            <div className="phone-card rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-[var(--gold-primary)]" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-[var(--text-primary)]">Notifications</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Goal reminders & alerts</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleNotificationsToggle}
+                  aria-label={`${notifications ? 'Disable' : 'Enable'} notifications`}
+                  className={`w-12 h-7 rounded-full transition-colors relative ${
+                    notifications ? 'bg-[var(--gold-primary)]' : 'bg-[var(--bg-tertiary)]'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${
+                      notifications ? 'left-6' : 'left-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -193,6 +275,29 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
             <div className="phone-card rounded-xl p-4">
               <h3 className="font-semibold text-[var(--text-primary)] mb-4">Data Management</h3>
               
+              {/* Import */}
+              <button
+                onClick={handleImportData}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-[var(--gold-soft)] mb-3 tap-target"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--gold-primary)]/20 flex items-center justify-center">
+                    <Upload className="w-5 h-5 text-[var(--gold-primary)]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-[var(--text-primary)]">Import Data</p>
+                    <p className="text-xs text-[var(--text-muted)]">Restore from backup</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />
+              </button>
+              {importStatus === 'success' && (
+                <p className="text-xs text-[var(--profit)] mb-2">Import successful! Reloading...</p>
+              )}
+              {importStatus === 'error' && (
+                <p className="text-xs text-[var(--loss)] mb-2">Import failed. Invalid file format.</p>
+              )}
+
               {/* Export */}
               <button
                 onClick={handleExportData}
@@ -275,6 +380,30 @@ export function MobileSettings({ onResetAllData }: MobileSettingsProps) {
                 <ChevronRight className="w-5 h-5 text-black/70" />
               </button>
             )}
+
+            {/* Cross-Device Sync */}
+            <div className="phone-card rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-[var(--gold-soft)] flex items-center justify-center">
+                  <RefreshCw className="w-5 h-5 text-[var(--gold-primary)]" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[var(--text-primary)]">Cross-Device Sync</h3>
+                </div>
+              </div>
+              <p className="text-sm text-[var(--text-secondary)] mb-3">
+                To use your data on another device:
+              </p>
+              <ol className="text-sm text-[var(--text-secondary)] space-y-2 mb-3 list-decimal list-inside">
+                <li>Export your data on this device</li>
+                <li>Transfer the .json file (email, cloud, USB)</li>
+                <li>Open AIOVAX on the other device</li>
+                <li>Import the backup file in Settings</li>
+              </ol>
+              <p className="text-xs text-[var(--text-muted)]">
+                Future versions will include automatic cloud sync.
+              </p>
+            </div>
 
             <div className="phone-card rounded-xl p-4">
               <h3 className="font-semibold text-[var(--text-primary)] mb-3">Features</h3>
