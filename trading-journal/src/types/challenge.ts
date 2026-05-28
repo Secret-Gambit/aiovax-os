@@ -54,6 +54,7 @@ export interface AccountGrowthPlan {
 export interface Challenge {
   id: string
   name: string
+  accountLabel: string // e.g., "Account #1 - FTMO", "Account #2 - The5%"
   createdAt: number
   
   // Initial parameters
@@ -63,8 +64,20 @@ export interface Challenge {
   maxDays: number
   avgStopLossPips: number // Average stop loss in pips
   
+  // Trading frequency & allocation
+  tradingFrequency: TradingFrequency
+  weeklySchedule?: WeeklySchedule // For weekly trading mode
+  maxTradesPerDay: number // Default: 1
+  maxTradesPerWeek?: number // For weekly mode
+  
+  // Risk distribution
+  riskPerTradePercent: number // Default: 1% (split across trades)
+  riskPerDayPercent: number // Default: 1% (total daily risk)
+  allowTradeSizeIncrease: boolean // Increase size on winning streaks
+  
   // Calculated
   requiredDailyRate: number // The daily compound rate needed
+  requiredWeeklyRate?: number // % for weekly mode
   initialLotSize: number
   
   // Progress
@@ -77,6 +90,15 @@ export interface Challenge {
   
   // Adaptive recalculation history
   recalculationLog: RecalculationEvent[]
+  
+  // Multi-account management
+  priority: number // 1 = highest priority
+  accountGrowthPlan?: AccountGrowthPlan
+  
+  // Relationships with other challenges
+  linkedChallengeIds?: string[] // Challenges to grow together
+  isCopyChallenge?: boolean // Copy trades from another challenge
+  sourceChallengeId?: string // If copying, which challenge
 }
 
 export interface RecalculationEvent {
@@ -103,11 +125,26 @@ export interface LotSizeCalculation {
 // Form input for creating challenge
 export interface ChallengeSetupInput {
   name: string
+  accountLabel?: string // e.g., "Account #1 - FTMO"
   startBalance: number
   targetBalance: number
   riskRewardRatio: number
   maxDays: number
   avgStopLossPips: number // For lot size calc
+  
+  // Trading configuration
+  tradingFrequency?: TradingFrequency
+  tradingDays?: DayOfWeek[] // For weekly mode
+  maxTradesPerWeek?: number
+  tradesPerDay?: number
+  
+  // Risk settings
+  riskPerTradePercent?: number
+  riskPerDayPercent?: number
+  allowTradeSizeIncrease?: boolean
+  
+  // Priority
+  priority?: number
 }
 
 // Daily trade input
@@ -116,6 +153,20 @@ export interface DailyTradeInput {
   profit: number // Can be negative
   trades: string[] // Reference to trade IDs
   notes?: string
+}
+
+// For managing multiple challenges
+export interface ChallengePortfolio {
+  challenges: Challenge[]
+  activeChallengeId: string | null
+  totalCapitalDeployed: number
+  totalTargetCapital: number
+  combinedProgressPercent: number
+  
+  // Cross-challenge analytics
+  bestPerformingChallengeId?: string
+  riskiestChallengeId?: string
+  recommendedFocus?: string // Which challenge needs attention
 }
 
 // Enhanced Adjustment Types with new strategies
