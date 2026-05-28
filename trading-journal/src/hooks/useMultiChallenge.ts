@@ -264,7 +264,7 @@ export function useMultiChallenge() {
 }
 
 // Helper function to generate challenge days
-function generateChallengeDays(challenge: Challenge): Challenge[] {
+function generateChallengeDays(challenge: Challenge): ChallengeDay[] {
   const days = []
   const startDate = new Date(challenge.createdAt)
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const

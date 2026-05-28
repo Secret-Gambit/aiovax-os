@@ -40,7 +40,7 @@ export interface WeeklySchedule {
   tradingDays: DayOfWeek[] // Which days of week to trade
   tradesPerWeek: number // Total trades for the week
   tradesPerTradingDay: number // Trades on each active day
-  weeklyTarget: number // Target for the whole week
+  weeklyTarget?: number // Target for the whole week (calculated automatically)
 }
 
 export interface AccountGrowthPlan {
