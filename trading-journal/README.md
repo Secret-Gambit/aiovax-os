@@ -1,14 +1,19 @@
-# AIOVAX Trading Journal
+# 📈 AIOVAX Trading Journal
 
-A professional trading journal for XAUUSD (Gold) traders with TradeZella-style dashboard analytics, risk management, and challenge engine.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20Site-gold?style=for-the-badge)](https://trading-journal-app.netlify.app/)
+![PWA](https://img.shields.io/badge/PWA-Offline%20Ready-blue?style=for-the-badge)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&style=for-the-badge)
 
-![Trading Journal](https://img.shields.io/badge/AIOVAX-Trading%20Journal-gold)
-![PWA](https://img.shields.io/badge/PWA-Offline%20Ready-blue)
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
-![Tailwind](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss)
+**A professional trading journal for XAUUSD (Gold) traders with TradeZella-style dashboard analytics, risk management, and challenge engine.**
 
-## Features
+[🌐 Live Demo](https://trading-journal-app.netlify.app/) • [📱 Install as App](#as-a-mobile-app-pwa) • [🐛 Report Bug](https://github.com/Secret-Gambit/aiovax-os/issues)
+
+## 📸 Screenshots
+
+> *Coming soon - Add screenshots of desktop dashboard, mobile interface, and trade logging*
+
+## ✨ Features
 
 ### 📊 Dashboard Analytics
 - **TradeZella-Style Dashboard** - Professional desktop layout with sidebar navigation
@@ -16,14 +21,19 @@ A professional trading journal for XAUUSD (Gold) traders with TradeZella-style d
 - **Visual Analytics** - R-Multiple histogram, 30-day heatmap, setup performance bars
 - **Setup Trends** - Sparkline charts showing win rate trends over last 20 trades
 - **Streak Tracking** - Visual streak counter with win/loss indicators
+- **Calendar View** - Monthly calendar with daily P&L coloring
+- **Session Performance** - Track performance by trading session (Asian, London, New York)
 
 ### 📝 Trade Logging
-- **Quick Trade Entry** - Direction, setup type, entry trigger, emotion tracking
+- **Quick Trade Entry** - Log trades in seconds with intuitive mobile interface
 - **R-Multiple Calculator** - Automatic R calculation from entry/exit
 - **Emotion Intensity Slider** - Track from Calm to Revenge Trading
 - **Trade Templates** - Save and reuse common trade setups
-- **Voice-to-Text Notes** - Speak your trade notes
-- **Chart Screenshots** - Attach trade images
+- **Voice-to-Text Notes** - Speak your trade notes (mobile)
+- **Multiple Chart Screenshots** - Attach up to 6 images per trade with full-screen viewer
+- **Entry Time Tracking** - Log exact entry time with timezone support
+- **Edit & Duplicate** - Modify existing trades or duplicate for similar setups
+- **One-Tap Delete** - Quick trade removal with confirmation
 
 ### 🎯 Risk Management
 - **Weekly R:R Goals** - Set and track weekly targets
@@ -32,17 +42,20 @@ A professional trading journal for XAUUSD (Gold) traders with TradeZella-style d
 - **Discipline Alerts** - Warnings for overtrading patterns
 
 ### 🏆 Challenge Engine
-- **Custom Challenges** - Starting balance, target, timeframe
-- **Daily Targets** - Automatic daily profit calculations
-- **Lot Size Calculator** - XAUUSD-optimized recommendations
-- **Adaptive Recalculation** - Adjusts when targets are missed
-- **Progress Tracking** - Visual progress wheels
+- **Custom Challenges** - Set starting balance, target, timeframe, and R:R ratio
+- **Daily Targets** - Automatic daily profit and lot size calculations
+- **Lot Size Calculator** - XAUUSD-optimized recommendations based on risk
+- **Adaptive Recalculation** - Engine adjusts when targets are missed
+- **Progress Tracking** - Visual progress wheels for days passed and profit targets
+- **Day-by-Day Tracking** - Log actual results vs targets for each trading day
 
 ### 📱 Multi-Platform
-- **Desktop Dashboard** - Full analytics view (≥1024px)
-- **Mobile Optimized** - Phone-friendly interface (<1024px)
-- **PWA Offline Support** - Works without internet
-- **Install on Home Screen** - Native app experience
+- **Desktop Dashboard** - Full analytics view (≥1024px) with TradeZella-style layout
+- **Mobile Optimized** - Phone-friendly interface (<1024px) with bottom navigation
+- **PWA Offline Support** - Works without internet after first load
+- **Install on Home Screen** - Native app experience on iOS and Android
+- **Responsive Design** - Seamlessly adapts to any screen size
+- **Touch Optimized** - Large tap targets and swipe-friendly interface
 
 ## Tech Stack
 
@@ -166,30 +179,51 @@ trading-journal/
 └── package.json
 ```
 
-## Data Storage & Backup
+## 💾 Data Storage & Backup
 
-All data stored locally in browser:
-- `trades` - Trade history
-- `weekly-goals` - Weekly targets
-- `current-challenge` - Challenge progress
-- `tradeTemplates` - Saved templates
+All data is stored **locally in your browser** - no server required, complete privacy:
+
+| Storage Key | Description |
+|-------------|-------------|
+| `trades` | Complete trade history with screenshots |
+| `weekly-goals` | Weekly R:R targets and progress |
+| `current-challenge` | Challenge configuration and daily logs |
+| `tradeTemplates` | Saved trade setup templates |
+| `settings` | App preferences and timezone settings |
+
+### 🔒 Privacy First
+- ✅ No account required
+- ✅ No data sent to servers
+- ✅ Works completely offline
+- ✅ You own your data
 
 ### Backup & Restore
-1. Go to **Settings → Data**
+1. Go to **Settings → Data Management**
 2. Click **Export Backup** to download JSON file
-3. Use **Import Backup** to restore from file
+3. Use **Import Backup** to restore from file (merges with existing data)
 4. **Clear All Data** to reset everything (with confirmation)
 
-## Browser Support
+**💡 Tip:** Export backup regularly to prevent data loss if browser storage is cleared.
 
-- Chrome/Edge (recommended)
-- Safari (iOS)
-- Firefox
-- Samsung Internet
+## 🌐 Browser Support
 
-## Roadmap
+| Browser | Desktop | Mobile | Notes |
+|---------|---------|--------|-------|
+| Chrome/Edge | ✅ | ✅ | Recommended - Best performance |
+| Safari | ✅ | ✅ | iOS - Full PWA support |
+| Firefox | ✅ | ⚠️ | Mobile PWA limited |
+| Samsung Internet | ❌ | ✅ | Android - Good PWA support |
+| Opera | ✅ | ✅ | Works well |
 
-- [x] Trade logging with images & voice notes
+### ⚠️ Known Limitations
+- **Firefox Mobile**: PWA installation limited on some versions
+- **Private/Incognito Mode**: LocalStorage may be cleared when session ends
+- **iOS Safari**: 50MB storage limit for offline cache
+
+## 🗺️ Roadmap
+
+### ✅ Completed
+- [x] Trade logging with multiple images & voice notes
 - [x] Weekly R:R goals with progress tracking
 - [x] Challenge engine with lot size calculator
 - [x] PWA offline support
@@ -199,10 +233,19 @@ All data stored locally in browser:
 - [x] Visualization components (histograms, heatmaps, gauges)
 - [x] Profit Factor & Expectancy calculations
 - [x] Settings page with data management
-- [ ] Multiple challenge presets
+- [x] Full-screen image viewer for trade screenshots
+- [x] Mobile-optimized trade history with delete functionality
+
+### 🚧 In Progress
+- [ ] Multiple challenge presets (100k, 200k, etc.)
+
+### 🔮 Planned
 - [ ] Push notifications for daily targets
 - [ ] Trade journal PDF export
 - [ ] Performance reports by month/quarter
+- [ ] Trade replay and analysis
+- [ ] Integration with broker APIs
+- [ ] Dark/light theme toggle
 
 ## Contributing
 

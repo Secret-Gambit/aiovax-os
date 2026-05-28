@@ -97,7 +97,8 @@ export function QuickLogger({
         result,
         rMultiple: result === 'Loss' ? -Math.abs(rMultiple) : rMultiple,
         notes: notes.trim() || undefined,
-        image: image || undefined,
+        images: images.length > 0 ? images : undefined,
+        image: images.length > 0 ? images[0] : undefined,
         entryTime: entryTime || undefined,
         timezoneOffset: entryTime ? timezoneOffset : undefined,
       })
@@ -113,7 +114,8 @@ export function QuickLogger({
         result,
         rMultiple: result === 'Loss' ? -Math.abs(rMultiple) : rMultiple,
         notes: notes.trim() || undefined,
-        image: image || undefined,
+        images: images.length > 0 ? images : undefined,
+        image: images.length > 0 ? images[0] : undefined,
         entryTime: entryTime || undefined,
         timezoneOffset: entryTime ? timezoneOffset : undefined,
       })
