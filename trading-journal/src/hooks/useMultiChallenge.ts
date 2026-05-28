@@ -276,7 +276,7 @@ function generateChallengeDays(challenge: Challenge): ChallengeDay[] {
   for (let i = 1; i <= challenge.maxDays; i++) {
     const dayOfWeek = dayNames[currentDate.getDay()] as Challenge['days'][0]['dayOfWeek']
     const isTradingDay = challenge.tradingFrequency === 'daily' || 
-      (challenge.tradingFrequency === 'weekly' && challenge.weeklySchedule?.tradingDays.includes(dayOfWeek))
+      (challenge.tradingFrequency === 'weekly' && challenge.weeklySchedule?.tradingDays.includes(dayOfWeek) === true)
     
     const targetProfit = runningBalance * challenge.requiredDailyRate
     const targetBalance = runningBalance + targetProfit
