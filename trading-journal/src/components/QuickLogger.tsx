@@ -648,7 +648,7 @@ export function QuickLogger({
         <section>
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
-              CHART SCREENSHOTS {images.length > 0 && `(${images.length})`}
+              CHART SCREENSHOTS {images.length > 0 && `(${images.length}/6)`}
             </p>
             {images.length > 0 && (
               <button
@@ -671,10 +671,12 @@ export function QuickLogger({
                       alt={`Trade chart ${idx + 1}`} 
                       className="w-full h-32 object-contain rounded-lg bg-black/50"
                     />
+                    {/* Delete button - always visible on mobile with bg */}
                     <button
                       onClick={() => handleRemoveImage(idx)}
-                      className="absolute top-1 right-1 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity tap-target"
+                      className="absolute top-1 right-1 w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center tap-target shadow-lg"
                       aria-label={`Remove image ${idx + 1}`}
+                      title="Remove this image"
                     >
                       <X size={16} />
                     </button>
@@ -685,21 +687,30 @@ export function QuickLogger({
                 ))}
               </div>
               
-              {/* Add More Button */}
-              <label 
-                className="w-full py-3 rounded-xl flex items-center justify-center gap-2 tap-target touch-manipulation cursor-pointer hover:bg-white/5 transition-colors border-2 border-dashed border-[var(--border-soft)] hover:border-[var(--gold-primary)]/50"
-              >
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Camera size={20} className="text-[var(--gold-primary)]" />
-                <span className="text-sm font-medium text-[var(--text-secondary)]">
-                  Add Another Screenshot
-                </span>
-              </label>
+              {/* Add More Button - disabled when at max */}
+              {images.length < 6 ? (
+                <label 
+                  className="w-full py-3 rounded-xl flex items-center justify-center gap-2 tap-target touch-manipulation cursor-pointer hover:bg-white/5 transition-colors border-2 border-dashed border-[var(--border-soft)] hover:border-[var(--gold-primary)]/50"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Camera size={20} className="text-[var(--gold-primary)]" />
+                  <span className="text-sm font-medium text-[var(--text-secondary)]">
+                    Add Another Screenshot ({6 - images.length} left)
+                  </span>
+                </label>
+              ) : (
+                <div className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-[var(--text-muted)]">
+                  <Camera size={20} />
+                  <span className="text-sm font-medium">
+                    Maximum 6 screenshots reached
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             <label 
