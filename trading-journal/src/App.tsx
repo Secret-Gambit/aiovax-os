@@ -18,6 +18,7 @@ import { useTrades } from './hooks/useTrades'
 import { useTemplates } from './hooks/useTemplates'
 import { useWeeklyGoals } from './hooks/useWeeklyGoals'
 import { useChallenge } from './hooks/useChallenge'
+import { useMultiChallenge } from './hooks/useMultiChallenge'
 import { themeColors, type ThemeColor } from './hooks/useTheme'
 
 type Screen = 'home' | 'logger' | 'insights' | 'history' | 'challenge' | 'challenge-setup' | 'settings'
@@ -60,6 +61,15 @@ function App() {
     getCurrentLotSize,
     isMajorDrawdown,
   } = useChallenge()
+
+  // Multi-challenge support (new enhanced features)
+  const {
+    portfolio,
+    createChallenge: createMultiChallenge,
+    switchActiveChallenge,
+    getActiveChallenge,
+    getActiveChallenges,
+  } = useMultiChallenge()
 
   // Onboarding state
   const [showOnboarding, setShowOnboarding] = useState(false)
