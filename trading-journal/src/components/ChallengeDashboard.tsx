@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Challenge, ChallengeDay, AdaptiveAdjustment } from '../types/challenge'
-import { Target, Calendar, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, DollarSign, ChevronRight, RotateCcw, Trash2 } from 'lucide-react'
+import { Target, Calendar, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, DollarSign, ChevronRight, RotateCcw, Trash2, BarChart3 } from 'lucide-react'
 import { ChallengeProgressWheel } from './visualizations'
 
 interface ChallengeDashboardProps {
@@ -391,17 +391,104 @@ export function ChallengeDashboard({
         </div>
       )}
 
-      {/* Result Modal */}
+      {/* Result Modal - Enhanced with Risk Metrics & Monte Carlo */}
       {showAdjustmentModal && adjustmentResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)' }}>
-          <div className="phone-card rounded-2xl p-5 w-full max-w-sm text-center">
-            <CheckCircle size={48} className="mx-auto mb-4 status-profit" />
-            <h3 className="text-lg font-bold mb-2">Plan Updated!</h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              {adjustmentResult.message}
-            </p>
+          <div className="phone-card rounded-2xl p-5 w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            <div className="text-center mb-4">
+              <CheckCircle size={48} className="mx-auto mb-4 status-profit" />
+              <h3 className="text-lg font-bold mb-2">Plan Updated!</h3>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                {adjustmentResult.message}
+              </p>
+            </div>
             
-            <div className="space-y-2 mb-4 text-left">
+            {/* Success Probability Gauge */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold">Success Probability</span>
+                <span className={`text-lg font-bold ${
+                  adjustmentResult.monteCarlo.probabilityOfSuccess > 70 ? 'status-profit' :
+                  adjustmentResult.monteCarlo.probabilityOfSuccess > 40 ? 'status-neutral' :
+                  'status-loss'
+                }`}>
+                  {adjustmentResult.monteCarlo.probabilityOfSuccess.toFixed(0)}%
+                </span>
+              </div>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
+                <div 
+                  className={`h-full rounded-full transition-all ${
+                    adjustmentResult.monteCarlo.probabilityOfSuccess > 70 ? 'bg-green-500' :
+                    adjustmentResult.monteCarlo.probabilityOfSuccess > 40 ? 'bg-yellow-500' :
+                    'bg-red-500'
+                  }`}
+                  style={{ width: `${adjustmentResult.monteCarlo.probabilityOfSuccess}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <span>Fail {adjustmentResult.monteCarlo.probabilityOfFailure.toFixed(0)}%</span>
+                <span>Extend {adjustmentResult.monteCarlo.probabilityOfExtension.toFixed(0)}%</span>
+              </div>
+            </div>
+            
+            {/* Target Breakdown */}
+            {adjustmentResult.targetBreakdown && (
+              <div className="mb-4 p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Target Breakdown</p>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Base Target</span>
+                    <span>${adjustmentResult.targetBreakdown.baseTarget.toFixed(0)}</span>
+                  </div>
+                  {adjustmentResult.targetBreakdown.catchUpAmount > 0 && (
+                    <div className="flex justify-between text-[var(--gold-primary)]">
+                      <span>Catch Up</span>
+                      <span>+${adjustmentResult.targetBreakdown.catchUpAmount.toFixed(0)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-[var(--text-muted)]">
+                    <span>Buffer</span>
+                    <span>${adjustmentResult.targetBreakdown.bufferAmount.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold pt-1 border-t border-[var(--border-soft)]">
+                    <span>Final Target</span>
+                    <span>${adjustmentResult.targetBreakdown.finalTarget.toFixed(0)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Risk Metrics */}
+            {adjustmentResult.riskMetrics && (
+              <div className="mb-4 p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Risk Assessment</p>
+                <div className="space-y-1 text-sm">
+                  {adjustmentResult.riskMetrics.currentDrawdownPercent > 0 && (
+                    <div className="flex justify-between">
+                      <span>Drawdown</span>
+                      <span className="status-loss">-{adjustmentResult.riskMetrics.currentDrawdownPercent.toFixed(1)}%</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Historical Win Rate</span>
+                    <span>{(adjustmentResult.riskMetrics.avgWinRate * 100).toFixed(0)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Avg R per Trade</span>
+                    <span>{adjustmentResult.riskMetrics.avgRMultiple.toFixed(2)}R</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Risk of Ruin</span>
+                    <span className={adjustmentResult.riskMetrics.riskOfRuin > 0.3 ? 'status-loss' : 'status-profit'}>
+                      {(adjustmentResult.riskMetrics.riskOfRuin * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Main Stats */}
+            <div className="space-y-2 mb-4">
               <div className="flex justify-between p-3 rounded-lg" style={{ background: 'var(--bg-tertiary)' }}>
                 <span className="text-sm" style={{ color: 'var(--text-muted)' }}>New Daily Target</span>
                 <span className="font-semibold">+${adjustmentResult.newDailyTarget.toFixed(2)}</span>
@@ -415,6 +502,19 @@ export function ChallengeDashboard({
                 <span className="font-semibold">{adjustmentResult.daysRemaining}</span>
               </div>
             </div>
+            
+            {/* Recommended Scenario Note */}
+            {adjustmentResult.recommendedScenario && adjustmentResult.recommendedScenario.id !== 'scenario-0' && (
+              <div className="mb-4 p-3 rounded-xl border border-[var(--gold-primary)]/30 bg-[var(--gold-primary)]/5">
+                <p className="text-sm font-semibold mb-1 flex items-center gap-1">
+                  <Target size={14} className="text-[var(--gold-primary)]" />
+                  Recommended Strategy
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Consider "{adjustmentResult.recommendedScenario.name}" for {adjustmentResult.recommendedScenario.successProbability.toFixed(0)}% success rate
+                </p>
+              </div>
+            )}
             
             <button
               onClick={() => {

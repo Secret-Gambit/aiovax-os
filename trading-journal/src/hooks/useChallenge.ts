@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import type { Challenge, ChallengeDay, ChallengeSetupInput, DailyTradeInput, AdaptiveAdjustment, RecalculationEvent } from '../types/challenge'
+import type { Challenge, ChallengeDay, ChallengeSetupInput, DailyTradeInput, AdaptiveAdjustment, RecalculationEvent, AdjustmentStrategy } from '../types/challenge'
+import type { Trade } from '../types/trade'
+import { 
+  calculateRiskMetrics, 
+  calculateAdaptiveAdjustment, 
+  canCompleteChallenge 
+} from '../utils/challengeEngine'
 
 const CHALLENGE_KEY = 'xauusd-challenge'
 
@@ -168,7 +174,32 @@ export const useChallenge = () => {
     }
   }, [challenge])
 
-  // Adaptive recalculation logic
+  // Get all trades (needs to be passed from parent)
+  const getTrades = useCallback((): Trade[] => {
+    // This will be populated by parent component
+    // For now, return empty array - in real implementation this comes from useTrades hook
+    const saved = localStorage.getItem('trades')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return []
+      }
+    }
+    return []
+  }, [])
+
+  // Map old adjustment types to new AdjustmentStrategy
+  const mapAdjustmentType = (type: 'stay' | 'extend' | 'reduce_risk'): AdjustmentStrategy => {
+    switch (type) {
+      case 'stay': return 'stay_course'
+      case 'extend': return 'extend_timeframe'
+      case 'reduce_risk': return 'reduce_risk'
+      default: return 'balanced'
+    }
+  }
+
+  // Enhanced adaptive recalculation using the new engine
   const recalculatePlan = useCallback((
     dayNumber: number,
     actualProfit: number,
@@ -185,6 +216,37 @@ export const useChallenge = () => {
         daysRemaining: 0,
         canComplete: false,
         message: 'No active challenge',
+        riskMetrics: {
+          currentDrawdownPercent: 0,
+          distanceToTargetPercent: 0,
+          riskOfRuin: 1,
+          dailyVolatility: 0,
+          avgWinRate: 0.45,
+          avgRMultiple: 2,
+          requiredWinRate: 0.5,
+          maxSafeLotSize: 0,
+          recommendedLotSize: 0,
+          riskAdjustedReturn: 0,
+        },
+        monteCarlo: {
+          probabilityOfSuccess: 0,
+          probabilityOfFailure: 100,
+          probabilityOfExtension: 0,
+          expectedFinalBalance: 0,
+          bestCaseBalance: 0,
+          worstCaseBalance: 0,
+          medianBalance: 0,
+          simulationsRun: 1000,
+          scenarios: [],
+        },
+        alternativeScenarios: [],
+        recommendedScenario: {} as any,
+        targetBreakdown: {
+          baseTarget: 0,
+          catchUpAmount: 0,
+          bufferAmount: 0,
+          finalTarget: 0,
+        },
       }
     }
     
@@ -222,33 +284,26 @@ export const useChallenge = () => {
       notes: notes || day.notes
     }
     
-    // Calculate remaining plan
-    const remainingDays = challenge.maxDays - dayNumber
+    // Get all trades for risk calculations
+    const allTrades = getTrades()
+    
+    // Use the new enhanced engine to calculate adaptive adjustment
+    const enhancedAdjustment = calculateAdaptiveAdjustment(
+      challenge,
+      actualBalance,
+      allTrades,
+      mapAdjustmentType(adjustmentType),
+      additionalDays
+    )
+    
+    // Calculate new daily rate from the recommended targets
+    const remainingDays = challenge.maxDays - dayNumber + (adjustmentType === 'extend' ? (additionalDays || 0) : 0)
     const remainingProfit = challenge.targetBalance - actualBalance
+    const newDailyRate = remainingDays > 0 && remainingProfit > 0
+      ? calculateDailyRate(actualBalance, challenge.targetBalance, remainingDays)
+      : 0
     
-    // Check if mathematically possible
-    const canComplete = remainingProfit > 0 && remainingDays > 0
-    
-    let newDailyRate = challenge.requiredDailyRate
-    let newDays = remainingDays
-    let message = ''
-    
-    if (adjustmentType === 'extend' && additionalDays) {
-      // User wants to add more days
-      newDays = remainingDays + additionalDays
-      newDailyRate = calculateDailyRate(actualBalance, challenge.targetBalance, newDays)
-      message = `Extended by ${additionalDays} days. New daily target adjusted.`
-    } else if (adjustmentType === 'stay' && canComplete) {
-      // Stay on course - increase daily target
-      newDailyRate = calculateDailyRate(actualBalance, challenge.targetBalance, remainingDays)
-      message = 'Staying on timeline. Daily target increased to compensate.'
-    } else if (adjustmentType === 'reduce_risk') {
-      // Target exceeded - reduce risk for next trades
-      newDailyRate = calculateDailyRate(actualBalance, challenge.targetBalance, remainingDays) * 0.8 // 20% buffer
-      message = 'Ahead of schedule! Reducing risk to protect profits.'
-    }
-    
-    // Recalculate all future days
+    // Recalculate all future days based on the adjustment
     let runningBalance = actualBalance
     for (let i = dayNumber; i < updatedDays.length; i++) {
       const targetProfit = runningBalance * newDailyRate
@@ -273,9 +328,9 @@ export const useChallenge = () => {
               adjustmentType === 'reduce_risk' ? 'target_exceeded' : 'target_not_met',
       previousDailyRate: challenge.requiredDailyRate,
       newDailyRate,
-      previousDaysRemaining: remainingDays,
-      newDaysRemaining: newDays,
-      message,
+      previousDaysRemaining: challenge.maxDays - dayNumber,
+      newDaysRemaining: remainingDays,
+      message: enhancedAdjustment.message,
     }
     
     // Update challenge
@@ -290,19 +345,8 @@ export const useChallenge = () => {
       recalculationLog: [...challenge.recalculationLog, recalculationEvent],
     })
     
-    // Calculate new lot size for next day
-    const nextDay = updatedDays[dayNumber]
-    
-    return {
-      type: adjustmentType === 'extend' ? 'extend_timeframe' : 
-            adjustmentType === 'reduce_risk' ? 'reduce_risk' : 'stay_course',
-      newDailyTarget: nextDay?.targetProfit || 0,
-      newLotSize: nextDay?.lotSize || 0,
-      daysRemaining: newDays,
-      canComplete,
-      message,
-    }
-  }, [challenge, calculateDailyRate, calculateLotSize])
+    return enhancedAdjustment
+  }, [challenge, calculateDailyRate, calculateLotSize, getTrades])
 
   // Log trades for a specific day
   const logDayTrades = useCallback((input: DailyTradeInput): AdaptiveAdjustment => {
@@ -317,6 +361,37 @@ export const useChallenge = () => {
         daysRemaining: 0,
         canComplete: false,
         message: 'No challenge active',
+        riskMetrics: {
+          currentDrawdownPercent: 0,
+          distanceToTargetPercent: 0,
+          riskOfRuin: 1,
+          dailyVolatility: 0,
+          avgWinRate: 0.45,
+          avgRMultiple: 2,
+          requiredWinRate: 0.5,
+          maxSafeLotSize: 0,
+          recommendedLotSize: 0,
+          riskAdjustedReturn: 0,
+        },
+        monteCarlo: {
+          probabilityOfSuccess: 0,
+          probabilityOfFailure: 100,
+          probabilityOfExtension: 0,
+          expectedFinalBalance: 0,
+          bestCaseBalance: 0,
+          worstCaseBalance: 0,
+          medianBalance: 0,
+          simulationsRun: 1000,
+          scenarios: [],
+        },
+        alternativeScenarios: [],
+        recommendedScenario: {} as any,
+        targetBreakdown: {
+          baseTarget: 0,
+          catchUpAmount: 0,
+          bufferAmount: 0,
+          finalTarget: 0,
+        },
       }
     }
     
@@ -329,6 +404,37 @@ export const useChallenge = () => {
         daysRemaining: 0,
         canComplete: false,
         message: 'Day not found',
+        riskMetrics: {
+          currentDrawdownPercent: 0,
+          distanceToTargetPercent: 0,
+          riskOfRuin: 1,
+          dailyVolatility: 0,
+          avgWinRate: 0.45,
+          avgRMultiple: 2,
+          requiredWinRate: 0.5,
+          maxSafeLotSize: 0,
+          recommendedLotSize: 0,
+          riskAdjustedReturn: 0,
+        },
+        monteCarlo: {
+          probabilityOfSuccess: 0,
+          probabilityOfFailure: 100,
+          probabilityOfExtension: 0,
+          expectedFinalBalance: 0,
+          bestCaseBalance: 0,
+          worstCaseBalance: 0,
+          medianBalance: 0,
+          simulationsRun: 1000,
+          scenarios: [],
+        },
+        alternativeScenarios: [],
+        recommendedScenario: {} as any,
+        targetBreakdown: {
+          baseTarget: 0,
+          catchUpAmount: 0,
+          bufferAmount: 0,
+          finalTarget: 0,
+        },
       }
     }
     

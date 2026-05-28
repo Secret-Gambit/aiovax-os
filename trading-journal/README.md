@@ -1,13 +1,13 @@
 # 📈 AIOVAX Trading Journal
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20Site-gold?style=for-the-badge)](https://trading-journal-app.netlify.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20Site-gold?style=for-the-badge)](https://aiovax.netlify.app/)
 ![PWA](https://img.shields.io/badge/PWA-Offline%20Ready-blue?style=for-the-badge)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&style=for-the-badge)
 
 **A professional trading journal for XAUUSD (Gold) traders with TradeZella-style dashboard analytics, risk management, and challenge engine.**
 
-[🌐 Live Demo](https://trading-journal-app.netlify.app/) • [📱 Install as App](#as-a-mobile-app-pwa) • [🐛 Report Bug](https://github.com/Secret-Gambit/aiovax-os/issues)
+[🌐 Live Demo](https://aiovax.netlify.app/) • [📱 Install as App](#as-a-mobile-app-pwa) • [🐛 Report Bug](https://github.com/Secret-Gambit/aiovax-os/issues)
 
 ## 📸 Screenshots
 
@@ -37,17 +37,25 @@
 
 ### 🎯 Risk Management
 - **Weekly R:R Goals** - Set and track weekly targets
+- **Multi-Trade Risk Control** - Per-trade and daily risk limits
 - **Discipline Scoring** - Percentage of calm vs emotional trades
 - **Progress Visualization** - Real-time goal tracking
 - **Discipline Alerts** - Warnings for overtrading patterns
+- **Drawdown Monitoring** - Track distance from start balance
+- **Risk of Ruin Calculator** - Kelly criterion-based probability calculations
 
 ### 🏆 Challenge Engine
 - **Custom Challenges** - Set starting balance, target, timeframe, and R:R ratio
-- **Daily Targets** - Automatic daily profit and lot size calculations
+- **Daily/Weekly Trading Modes** - Trade daily or specific days only (e.g., Mon/Wed/Fri)
+- **Multi-Trade Allocation** - Distribute daily risk across multiple trades with smart strategies
 - **Lot Size Calculator** - XAUUSD-optimized recommendations based on risk
 - **Adaptive Recalculation** - Engine adjusts when targets are missed
+- **Monte Carlo Simulation** - Success probability calculations with risk metrics
 - **Progress Tracking** - Visual progress wheels for days passed and profit targets
 - **Day-by-Day Tracking** - Log actual results vs targets for each trading day
+- **Multi-Account Portfolio** - Run and manage multiple challenges simultaneously
+- **Trade Copying** - Link challenges to copy trades across accounts
+- **Risk Distribution** - Smart allocation strategies (Equal, Descending, First-Heavy)
 
 ### 📱 Multi-Platform
 - **Desktop Dashboard** - Full analytics view (≥1024px) with TradeZella-style layout
@@ -237,9 +245,7 @@ All data is stored **locally in your browser** - no server required, complete pr
 - [x] Mobile-optimized trade history with delete functionality
 
 ### 🚧 In Progress
-- [ ] Multiple challenge presets (100k, 200k, etc.)
-
-### 🔮 Planned
+- [ ] Challenge presets (100k, 200k, 500k, etc.)
 - [ ] Push notifications for daily targets
 - [ ] Trade journal PDF export
 - [ ] Performance reports by month/quarter
