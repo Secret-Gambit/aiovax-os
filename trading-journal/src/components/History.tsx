@@ -334,14 +334,16 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                     </div>
                     <div className={`grid gap-2 ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                       {images.map((img, idx) => (
-                        <button
+                        <div
                           key={idx}
                           onClick={() => {
                             setCurrentImageIndex(idx)
                             setViewingImage(img)
                           }}
-                          className="relative w-full p-0 bg-transparent border-0 cursor-pointer group"
-                          title={`View screenshot ${idx + 1}`}
+                          className="relative w-full cursor-pointer group tap-target touch-manipulation"
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`View screenshot ${idx + 1}`}
                         >
                           <img 
                             src={img} 
@@ -349,10 +351,10 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                             className="w-full rounded-xl hover:opacity-90 transition-opacity"
                             style={{ maxHeight: '200px', objectFit: 'cover' }}
                           />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity rounded-xl pointer-events-none">
                             <ZoomIn size={24} className="text-white" />
                           </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </div>
