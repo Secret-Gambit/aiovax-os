@@ -71,6 +71,16 @@ export function getSessionFromTrade(trade: Trade): TradingSession | null {
   return getSessionFromHour(localHour)
 }
 
+// Get session from trade entry time using LOCAL time directly (no UTC conversion)
+// This respects the user's local timezone as entered
+export function getSessionFromTradeLocal(trade: Trade): TradingSession | null {
+  if (!trade.entryTime) return null
+  
+  // Use the hour directly as entered by the user (local time)
+  const localHour = parseTimeToHour(trade.entryTime)
+  return getSessionFromHour(localHour)
+}
+
 // Get session display info
 export function getSessionInfo(session: TradingSession): {
   label: string
@@ -111,7 +121,8 @@ export function getSessionInfo(session: TradingSession): {
 }
 
 // Calculate stats for each trading session
-export function calculateSessionStats(trades: Trade[]): SessionStats[] {
+// useLocalTime: if true, uses entry time as-is without UTC conversion (for users who log in their local timezone)
+export function calculateSessionStats(trades: Trade[], useLocalTime = false): SessionStats[] {
   const sessionMap = new Map<TradingSession, {
     trades: Trade[]
     wins: number
@@ -142,7 +153,7 @@ export function calculateSessionStats(trades: Trade[]): SessionStats[] {
 
   // Process each trade with entry time
   trades.forEach(trade => {
-    const session = getSessionFromTrade(trade)
+    const session = useLocalTime ? getSessionFromTradeLocal(trade) : getSessionFromTrade(trade)
     if (!session) return
 
     const stats = sessionMap.get(session)!

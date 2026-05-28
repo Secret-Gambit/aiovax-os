@@ -192,8 +192,8 @@ export const useTrades = () => {
     }
   }, [todayTrades, allTimeTrades])
 
-  // Session-based analytics
-  const sessionStats = useMemo(() => calculateSessionStats(allTimeTrades), [allTimeTrades])
+  // Session-based analytics (using local time - no UTC conversion)
+  const sessionStats = useMemo(() => calculateSessionStats(allTimeTrades, true), [allTimeTrades])
   const hourlyPerformance = useMemo(() => calculateHourlyPerformance(allTimeTrades), [allTimeTrades])
 
   const disciplineAlerts = useMemo((): DisciplineAlert[] => {

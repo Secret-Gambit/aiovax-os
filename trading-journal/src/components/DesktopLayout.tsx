@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { Trade, TradeTemplate } from '../types/trade'
 import type { Challenge, ChallengeDay, ChallengeSetupInput, AdaptiveAdjustment } from '../types/challenge'
 import type { DisciplineAlert } from '../hooks/useTrades'
@@ -15,13 +15,18 @@ import {
   TrendingUp,
   TrendingDown,
   Flame,
-  Target
+  Target,
+  Calendar as CalendarIcon,
+  Clock
 } from 'lucide-react'
 import { RMHistogram, SetupPerformanceBars, DailyHeatStrip, WinRateGauge, DisciplineScoreRing, SetupTrends, StreakVisualizer } from './visualizations'
 import { QuickLogger } from './QuickLogger'
 import { History as HistoryComponent } from './History'
 import { ChallengeDashboard } from './ChallengeDashboard'
 import { ChallengeSetup } from './ChallengeSetup'
+import { Calendar } from './Calendar'
+import { SessionPerformance } from './SessionPerformance'
+import { calculateSessionStats, type SessionStats } from '../utils/sessionAnalytics'
 
 type DesktopScreen = 'dashboard' | 'logger' | 'history' | 'analytics' | 'challenge' | 'settings'
 
@@ -630,6 +635,8 @@ function AnalyticsView({
   allTimeTrades: Trade[]
   todayTrades: Trade[]
 }) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'calendar' | 'sessions'>('overview')
+  
   // Calculate profit factor
   const winningTrades = allTimeTrades.filter(t => t.result === 'Win')
   const losingTrades = allTimeTrades.filter(t => t.result === 'Loss')
@@ -643,8 +650,56 @@ function AnalyticsView({
   const winRate = stats.allTime.winRate / 100
   const expectancy = (winRate * avgWin) - ((1 - winRate) * avgLoss)
 
+  // Calculate session stats using the utility function
+  const sessionStats = useMemo(() => calculateSessionStats(allTimeTrades), [allTimeTrades])
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Tab Navigation */}
+      <div className="flex rounded-xl overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`flex-1 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'overview' ? 'gold-accent' : ''
+          }`}
+          style={{ color: activeTab === 'overview' ? undefined : 'var(--text-muted)' }}
+        >
+          <BarChart3 size={16} />
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className={`flex-1 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'calendar' ? 'gold-accent' : ''
+          }`}
+          style={{ color: activeTab === 'calendar' ? undefined : 'var(--text-muted)' }}
+        >
+          <CalendarIcon size={16} />
+          Calendar
+        </button>
+        <button
+          onClick={() => setActiveTab('sessions')}
+          className={`flex-1 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'sessions' ? 'gold-accent' : ''
+          }`}
+          style={{ color: activeTab === 'sessions' ? undefined : 'var(--text-muted)' }}
+        >
+          <Clock size={16} />
+          Sessions
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'calendar' ? (
+        <div className="h-[calc(100vh-200px)] overflow-y-auto">
+          <Calendar allTimeTrades={allTimeTrades} />
+        </div>
+      ) : activeTab === 'sessions' ? (
+        <div className="h-[calc(100vh-200px)] overflow-y-auto p-4">
+          <SessionPerformance sessionStats={sessionStats} hourlyPerformance={[]} />
+        </div>
+      ) : (
+        <div className="space-y-6">
       {/* Section: Key Metrics Grid - 2x2 Layout */}
       <section>
         <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4">
@@ -861,6 +916,8 @@ function AnalyticsView({
           <SetupTrends trades={allTimeTrades} />
         </div>
       </section>
+        </div>
+      )}
     </div>
   )
 }

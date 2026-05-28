@@ -332,38 +332,60 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                 </div>
               )}
 
-              {/* Full Size Chart Screenshot */}
+              {/* Full Size Chart Screenshot - Clickable to expand */}
               {viewingTrade.image && (
                 <div>
-                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Chart Screenshot</p>
-                  <img 
-                    src={viewingTrade.image} 
-                    alt="Trade chart" 
-                    className="w-full rounded-xl"
-                    style={{ maxHeight: '400px', objectFit: 'contain' }}
-                  />
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Chart Screenshot (Tap to expand)</p>
+                  <button
+                    onClick={() => window.open(viewingTrade.image || '', '_blank')}
+                    className="w-full p-0 bg-transparent border-0 cursor-pointer"
+                    title="View full size screenshot"
+                  >
+                    <img 
+                      src={viewingTrade.image} 
+                      alt="Trade chart" 
+                      className="w-full rounded-xl hover:opacity-90 transition-opacity"
+                      style={{ maxHeight: '400px', objectFit: 'contain' }}
+                    />
+                  </button>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                {onEditTrade && (
+              <div className="flex flex-col gap-3 pt-2">
+                <div className="flex gap-3">
+                  {onEditTrade && (
+                    <button
+                      onClick={() => {
+                        setViewingTrade(null)
+                        onEditTrade(viewingTrade)
+                      }}
+                      className="flex-1 py-3 rounded-xl font-semibold tap-target transition-all gold-accent"
+                    >
+                      Edit Trade
+                    </button>
+                  )}
                   <button
-                    onClick={() => {
-                      setViewingTrade(null)
-                      onEditTrade(viewingTrade)
-                    }}
-                    className="flex-1 py-3 rounded-xl font-semibold tap-target transition-all gold-accent"
+                    onClick={() => setViewingTrade(null)}
+                    className="flex-1 py-3 rounded-xl font-semibold tap-target transition-all phone-card"
+                    style={{ color: 'var(--text-muted)' }}
                   >
-                    Edit Trade
+                    Close
                   </button>
-                )}
+                </div>
+                {/* Delete Button */}
                 <button
-                  onClick={() => setViewingTrade(null)}
-                  className="flex-1 py-3 rounded-xl font-semibold tap-target transition-all phone-card"
-                  style={{ color: 'var(--text-muted)' }}
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete this trade?')) {
+                      deleteTrade(viewingTrade.id)
+                      setViewingTrade(null)
+                    }
+                  }}
+                  className="w-full py-3 rounded-xl font-semibold tap-target transition-all flex items-center justify-center gap-2"
+                  style={{ background: 'var(--loss-soft)', color: 'var(--loss)' }}
                 >
-                  Close
+                  <Trash2 size={18} />
+                  Delete Trade
                 </button>
               </div>
             </div>

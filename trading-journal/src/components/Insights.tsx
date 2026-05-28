@@ -334,7 +334,9 @@ export function Insights({ stats, todayTrades, allTimeTrades, deleteTrade, sessi
 
       {/* Content based on active tab */}
       {activeTab === 'calendar' ? (
-        <CalendarComponent allTimeTrades={allTimeTrades} />
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
+          <CalendarComponent allTimeTrades={allTimeTrades} />
+        </div>
       ) : activeTab === 'sessions' ? (
         <div className="flex-1 overflow-y-auto scrollbar-hide px-5 py-4">
           <SessionPerformance sessionStats={sessionStats} hourlyPerformance={hourlyPerformance} />
