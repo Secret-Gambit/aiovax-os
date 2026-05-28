@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Challenge, ChallengePortfolio, ChallengeSetupInput, DailyTradeInput } from '../types/challenge'
+import type { Challenge, ChallengeDay, ChallengePortfolio, ChallengeSetupInput, DailyTradeInput } from '../types/challenge'
 import type { Trade } from '../types/trade'
 
 const CHALLENGE_PORTFOLIO_KEY = 'challenge-portfolio'
@@ -136,6 +136,7 @@ export function useMultiChallenge() {
       status: 'active',
       totalExtensions: 0,
       recalculationLog: [],
+      initialLotSize: 0.01, // Default initial lot size
       requiredDailyRate: (input.targetBalance - input.startBalance) / input.startBalance / input.maxDays,
       requiredWeeklyRate: input.tradingFrequency === 'weekly' 
         ? (input.targetBalance - input.startBalance) / input.startBalance / (input.maxDays / 7)
