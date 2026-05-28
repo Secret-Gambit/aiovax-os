@@ -60,7 +60,7 @@ export function QuickLogger({
   const [result, setResult] = useState<Result | null>(editingTrade?.result || null)
   const [rMultiple, setRMultiple] = useState<number>(editingTrade?.rMultiple || 0)
   const [notes, setNotes] = useState<string>(editingTrade?.notes || (initialTrade?.setup ? `Copied from: ${initialTrade.setup.join(', ')}` : ''))
-  const [image, setImage] = useState<string | null>(editingTrade?.image || null)
+  const [images, setImages] = useState<string[]>(editingTrade?.images || (editingTrade?.image ? [editingTrade.image] : []))
   
   // Template state
   const [showTemplates, setShowTemplates] = useState(false)
@@ -132,7 +132,7 @@ export function QuickLogger({
     setResult(null)
     setRMultiple(0)
     setNotes('')
-    setImage(null)
+    setImages([])
     stopListening()
   }
 
@@ -176,14 +176,14 @@ export function QuickLogger({
       const base64 = event.target?.result as string
       if (base64) {
         const compressed = await compressImage(base64)
-        setImage(compressed)
+        setImages(prev => [...prev, compressed])
       }
     }
     reader.readAsDataURL(file)
   }
 
-  const handleRemoveImage = () => {
-    setImage(null)
+  const handleRemoveImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
   }
 
   const applyTemplate = (template: TradeTemplate) => {
@@ -644,40 +644,62 @@ export function QuickLogger({
           </div>
         </section>
 
-        {/* Image Upload - Drag & Drop */}
+        {/* Image Upload - Drag & Drop - Multiple Images Support */}
         <section>
           <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>CHART SCREENSHOT</p>
-            {image && (
+            <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+              CHART SCREENSHOTS {images.length > 0 && `(${images.length})`}
+            </p>
+            {images.length > 0 && (
               <button
-                onClick={handleRemoveImage}
+                onClick={() => setImages([])}
                 className="text-xs text-red-400 hover:text-red-300 transition-colors"
               >
-                Remove
+                Remove All
               </button>
             )}
           </div>
           
-          {image ? (
-            <div className="phone-card rounded-xl p-3">
-              <div className="relative group">
-                <img 
-                  src={image} 
-                  alt="Trade chart" 
-                  className="w-full h-48 object-contain rounded-lg bg-black/50"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                  <button
-                    onClick={handleRemoveImage}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium tap-target"
-                  >
-                    Remove Image
-                  </button>
-                </div>
+          {images.length > 0 ? (
+            <div className="space-y-3">
+              {/* Image Grid */}
+              <div className={`grid gap-2 ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {images.map((img, idx) => (
+                  <div key={idx} className="phone-card rounded-xl p-2 relative group">
+                    <img 
+                      src={img} 
+                      alt={`Trade chart ${idx + 1}`} 
+                      className="w-full h-32 object-contain rounded-lg bg-black/50"
+                    />
+                    <button
+                      onClick={() => handleRemoveImage(idx)}
+                      className="absolute top-1 right-1 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity tap-target"
+                      aria-label={`Remove image ${idx + 1}`}
+                    >
+                      <X size={16} />
+                    </button>
+                    <span className="absolute bottom-1 left-1 px-2 py-0.5 rounded text-xs bg-black/50 text-white">
+                      {idx + 1}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
-                Tap image to view, hover for options
-              </p>
+              
+              {/* Add More Button */}
+              <label 
+                className="w-full py-3 rounded-xl flex items-center justify-center gap-2 tap-target touch-manipulation cursor-pointer hover:bg-white/5 transition-colors border-2 border-dashed border-[var(--border-soft)] hover:border-[var(--gold-primary)]/50"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Camera size={20} className="text-[var(--gold-primary)]" />
+                <span className="text-sm font-medium text-[var(--text-secondary)]">
+                  Add Another Screenshot
+                </span>
+              </label>
             </div>
           ) : (
             <label 
@@ -699,7 +721,7 @@ export function QuickLogger({
                     const base64 = event.target?.result as string
                     if (base64) {
                       const compressed = await compressImage(base64)
-                      setImage(compressed)
+                      setImages(prev => [...prev, compressed])
                     }
                   }
                   reader.readAsDataURL(file)
@@ -720,7 +742,10 @@ export function QuickLogger({
                   Tap to upload or drag & drop
                 </p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Supports: JPG, PNG, WebP (max 5MB)
+                  Supports: JPG, PNG, WebP (max 5MB each)
+                </p>
+                <p className="text-xs text-[var(--gold-primary)] mt-1">
+                  You can add multiple screenshots
                 </p>
               </div>
             </label>

@@ -37,7 +37,8 @@ export interface Trade {
   result: Result
   rMultiple: number
   notes?: string
-  image?: string // base64 compressed image
+  image?: string // base64 compressed image (legacy - kept for backward compatibility)
+  images?: string[] // Array of base64 compressed images (new - supports multiple screenshots)
 }
 
 export const INSTRUMENTS: Instrument[] = [
@@ -105,4 +106,5 @@ export interface TradeTemplate {
   emotion: Emotion
   entryTime?: string
   timezoneOffset?: number
+  images?: string[]
 }

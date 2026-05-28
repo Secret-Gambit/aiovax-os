@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Trade } from '../types/trade'
-import { TrendingUp, TrendingDown, List, Trash2, X, Check, Copy, Edit, Eye, Clock, Calendar } from 'lucide-react'
+import { TrendingUp, TrendingDown, List, Trash2, X, Check, Copy, Edit, Eye, Clock, Calendar, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 
 interface HistoryProps {
   allTimeTrades: Trade[]
@@ -12,6 +12,16 @@ interface HistoryProps {
 export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTrade }: HistoryProps) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [viewingTrade, setViewingTrade] = useState<Trade | null>(null)
+  const [viewingImage, setViewingImage] = useState<string | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
+
+  // Helper to get all images for a trade (both legacy single image and new images array)
+  const getTradeImages = (trade: Trade): string[] => {
+    const images: string[] = []
+    if (trade.image) images.push(trade.image)
+    if (trade.images) images.push(...trade.images)
+    return images
+  }
   const sortedTrades = [...allTimeTrades].sort((a, b) => b.timestamp - a.timestamp)
 
   const formatDate = (timestamp: number) => {
@@ -311,24 +321,43 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                 </div>
               )}
 
-              {/* Full Size Chart Screenshot - Clickable to expand */}
-              {viewingTrade.image && (
-                <div>
-                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Chart Screenshot (Tap to expand)</p>
-                  <button
-                    onClick={() => window.open(viewingTrade.image || '', '_blank')}
-                    className="w-full p-0 bg-transparent border-0 cursor-pointer"
-                    title="View full size screenshot"
-                  >
-                    <img 
-                      src={viewingTrade.image} 
-                      alt="Trade chart" 
-                      className="w-full rounded-xl hover:opacity-90 transition-opacity"
-                      style={{ maxHeight: '400px', objectFit: 'contain' }}
-                    />
-                  </button>
-                </div>
-              )}
+              {/* Multiple Chart Screenshots - Clickable to expand */}
+              {(() => {
+                const images = getTradeImages(viewingTrade)
+                if (images.length === 0) return null
+                return (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+                        Chart Screenshots ({images.length}) - Tap to expand
+                      </p>
+                    </div>
+                    <div className={`grid gap-2 ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                      {images.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setCurrentImageIndex(idx)
+                            setViewingImage(img)
+                          }}
+                          className="relative w-full p-0 bg-transparent border-0 cursor-pointer group"
+                          title={`View screenshot ${idx + 1}`}
+                        >
+                          <img 
+                            src={img} 
+                            alt={`Trade chart ${idx + 1}`} 
+                            className="w-full rounded-xl hover:opacity-90 transition-opacity"
+                            style={{ maxHeight: '200px', objectFit: 'cover' }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
+                            <ZoomIn size={24} className="text-white" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-3 pt-2">
@@ -369,6 +398,77 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Full-Screen Image Viewer Modal */}
+      {viewingImage && viewingTrade && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
+          <button
+            onClick={() => setViewingImage(null)}
+            className="absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center tap-target z-10"
+            style={{ background: 'rgba(255,255,255,0.1)' }}
+            aria-label="Close image viewer"
+          >
+            <X size={24} className="text-white" />
+          </button>
+          
+          {/* Image Counter */}
+          {(() => {
+            const images = getTradeImages(viewingTrade)
+            if (images.length > 1) {
+              return (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-medium text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  {currentImageIndex + 1} / {images.length}
+                </div>
+              )
+            }
+            return null
+          })()}
+
+          {/* Previous/Next Navigation */}
+          {(() => {
+            const images = getTradeImages(viewingTrade)
+            if (images.length > 1) {
+              return (
+                <>
+                  <button
+                    onClick={() => {
+                      const newIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1
+                      setCurrentImageIndex(newIndex)
+                      setViewingImage(images[newIndex])
+                    }}
+                    className="absolute left-4 w-12 h-12 rounded-full flex items-center justify-center tap-target"
+                    style={{ background: 'rgba(255,255,255,0.1)' }}
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft size={24} className="text-white" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1
+                      setCurrentImageIndex(newIndex)
+                      setViewingImage(images[newIndex])
+                    }}
+                    className="absolute right-4 w-12 h-12 rounded-full flex items-center justify-center tap-target"
+                    style={{ background: 'rgba(255,255,255,0.1)' }}
+                    aria-label="Next image"
+                  >
+                    <ChevronRight size={24} className="text-white" />
+                  </button>
+                </>
+              )
+            }
+            return null
+          })()}
+
+          {/* Full Size Image */}
+          <img
+            src={viewingImage}
+            alt="Full size trade chart"
+            className="max-w-full max-h-[90vh] object-contain rounded-xl"
+            onClick={() => setViewingImage(null)}
+          />
         </div>
       )}
     </div>
