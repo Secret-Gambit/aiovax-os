@@ -72,23 +72,24 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
       </div>
 
       {/* Trade List */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-5 pb-5 space-y-2">
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-5 pb-5 space-y-3">
         {sortedTrades.map((trade) => (
           <div
             key={trade.id}
-            className="phone-card p-3"
+            className="phone-card p-3 cursor-pointer active:scale-[0.98] transition-transform"
+            onClick={() => setViewingTrade(trade)}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                     trade.direction === 'buy' ? 'bg-green-500/20' : 'bg-red-500/20'
                   }`}
                 >
                   {trade.direction === 'buy' ? (
-                    <TrendingUp size={16} style={{ color: 'var(--profit)' }} />
+                    <TrendingUp size={18} style={{ color: 'var(--profit)' }} />
                   ) : (
-                    <TrendingDown size={16} style={{ color: 'var(--loss)' }} />
+                    <TrendingDown size={18} style={{ color: 'var(--loss)' }} />
                   )}
                 </div>
                 <div>
@@ -102,59 +103,37 @@ export function History({ allTimeTrades, deleteTrade, onDuplicateTrade, onEditTr
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <span
-                  className={`text-lg font-bold ${
+                  className={`text-xl font-bold mr-2 ${
                     trade.result === 'Win' ? 'status-profit' : trade.result === 'Loss' ? 'status-loss' : ''
                   }`}
                 >
                   {trade.rMultiple > 0 ? '+' : ''}{trade.rMultiple.toFixed(1)}R
                 </span>
-                {/* Edit Button */}
+                {/* Action buttons - stop propagation to prevent opening modal */}
                 {onEditTrade && (
                   <button
-                    onClick={() => onEditTrade(trade)}
-                    className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); onEditTrade(trade); }}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
                     style={{ color: 'var(--text-muted)' }}
-                    title="Edit trade"
+                    title="Edit"
                     aria-label="Edit trade"
                   >
-                    <Edit size={18} />
+                    <Edit size={16} />
                   </button>
                 )}
-                {/* Duplicate Button */}
-                {onDuplicateTrade && (
-                  <button
-                    onClick={() => onDuplicateTrade(trade)}
-                    className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
-                    style={{ color: 'var(--text-muted)' }}
-                    title="Duplicate trade"
-                    aria-label="Duplicate trade"
-                  >
-                    <Copy size={18} />
-                  </button>
-                )}
-                {/* View Button */}
-                <button
-                  onClick={() => setViewingTrade(trade)}
-                  className="w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
-                  style={{ color: 'var(--text-muted)' }}
-                  title="View trade details"
-                  aria-label="View trade details"
-                >
-                  <Eye size={18} />
-                </button>
                 {/* Delete Button */}
                 <button
-                  onClick={() => handleDelete(trade.id)}
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center tap-target touch-manipulation transition-all active:scale-95 cursor-pointer ${
+                  onClick={(e) => { e.stopPropagation(); handleDelete(trade.id); }}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center tap-target touch-manipulation transition-all active:scale-95 cursor-pointer ${
                     deleteConfirm === trade.id ? 'bg-red-500/20' : 'hover:bg-white/10'
                   }`}
                   style={{ color: deleteConfirm === trade.id ? 'var(--loss)' : 'var(--text-muted)' }}
                   title={deleteConfirm === trade.id ? 'Confirm delete' : 'Delete trade'}
                   aria-label={deleteConfirm === trade.id ? 'Confirm delete' : 'Delete trade'}
                 >
-                  {deleteConfirm === trade.id ? <Check size={18} /> : <Trash2 size={18} />}
+                  {deleteConfirm === trade.id ? <Check size={16} /> : <Trash2 size={16} />}
                 </button>
               </div>
             </div>
