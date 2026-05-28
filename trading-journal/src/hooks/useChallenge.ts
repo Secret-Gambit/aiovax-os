@@ -105,6 +105,8 @@ export const useChallenge = () => {
       const targetBalance = currentBalance + targetProfit
       const lotSize = calculateLotSize(currentBalance, riskRewardRatio, targetProfit, avgStopLossPips)
       
+      const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][new Date(Date.now() + (i - 1) * 24 * 60 * 60 * 1000).getDay()] as ChallengeDay['dayOfWeek']
+      
       days.push({
         dayNumber: i,
         date: Date.now() + (i - 1) * 24 * 60 * 60 * 1000, // Start from tomorrow
@@ -115,6 +117,9 @@ export const useChallenge = () => {
         trades: [],
         status: 'pending',
         lotSize,
+        maxTradesPerDay: 1,
+        isTradingDay: true,
+        dayOfWeek,
       })
       
       currentBalance = targetBalance
@@ -123,12 +128,18 @@ export const useChallenge = () => {
     const challenge: Challenge = {
       id: `challenge_${Date.now()}`,
       name,
+      accountLabel: `Account #1`,
       createdAt: Date.now(),
       startBalance,
       targetBalance,
       riskRewardRatio,
       maxDays,
       avgStopLossPips,
+      tradingFrequency: 'daily',
+      maxTradesPerDay: 1,
+      riskPerTradePercent: 1,
+      riskPerDayPercent: 1,
+      allowTradeSizeIncrease: false,
       requiredDailyRate: dailyRate,
       initialLotSize,
       days,
@@ -136,6 +147,7 @@ export const useChallenge = () => {
       status: 'active',
       totalExtensions: 0,
       recalculationLog: [],
+      priority: 1,
     }
     
     setChallenge(challenge)
